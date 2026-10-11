@@ -166,6 +166,22 @@ label.avb{display:inline-block;cursor:pointer}
 .thm.on{border-color:var(--acc)}
 .sws{display:flex;flex:none;border-radius:50%;overflow:hidden;width:34px;height:34px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
 .sws i{flex:1}
+.rl>button.rn{flex:1;min-width:0;text-align:left;background:transparent;border:0;color:var(--ink);font:inherit;padding:6px 4px}
+.modal .card .pl{background:var(--bg);padding:10px}
+.modal .card.pc{max-height:88vh;overflow:auto;padding:14px}
+.pch{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.pcs{color:var(--mut);font-size:14px;margin-top:2px}
+.ph{font:700 12px Barlow,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:12px 2px 6px}
+.ptot{display:grid;grid-template-columns:repeat(5,1fr);gap:10px 4px;background:var(--bg);border-radius:12px;padding:10px;text-align:center}
+.ptot i{display:block;font:600 10px Barlow,sans-serif;letter-spacing:.1em;color:var(--mut);font-style:normal}
+.ptot u{text-decoration:none;font:700 19px/1.1 "Barlow Condensed","Arial Narrow",sans-serif}
+.modal .tile{background:var(--bg)}
+.glog{background:var(--bg);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.gl1{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
+.gl1 b{font:700 20px/1 "Barlow Condensed","Arial Narrow",sans-serif}
+.gl2{color:var(--mut);font-size:12px;margin-top:3px}
+.fbadge{font-style:normal;display:inline-block;background:var(--acc);color:var(--onacc);border-radius:8px;padding:2px 8px;font:700 12px Barlow,sans-serif;letter-spacing:.1em;vertical-align:middle}
+.line .fbadge{color:var(--onacc);font-size:12px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:12px}
 .modal.on{display:flex}
 .modal .card{background:var(--card);border-radius:16px;padding:12px;width:100%;max-width:420px}
@@ -182,19 +198,21 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 <div class="tabs" id="tabs"></div>
 <main id="main"></main>
 <div id="court" class="modal"></div>
+<div id="pstat" class="modal"></div>
+<div id="assist" class="modal"></div>
 <div id="toast" role="status"></div>
 <input type="file" id="file" accept="image/*">
 <input type="file" id="cam" accept="image/*" capture="environment">
 
 <script>
 const T=[['game','Game'],['box','Box score'],['roster','Roster'],['games','Saved']];
-const S0={teams:[{id:'t1',name:'My team',players:[]}],tid:'t1',games:[],gid:null,opp:'Away',leagues:[],league:'',court:[],profiles:[],view:null,log:[],q:1,sel:null,tab:'roster',fmt:'q'};
+const S0={teams:[{id:'t1',name:'My team',players:[]}],tid:'t1',games:[],finished:[],gid:null,opp:'Away',leagues:[],league:'',court:[],profiles:[],view:null,log:[],q:1,sel:null,tab:'roster',fmt:'q'};
 let S=load();S.screen='home';ensureProfiles();
 function load(){try{const s=JSON.parse(localStorage.getItem('hoops')||'null');const o=s?Object.assign({},S0,s):{...S0};if(s&&s.players&&!s.teams){o.teams=[{id:'t1',name:'My team',players:s.players}];o.tid='t1'}delete o.players;return o}catch(e){return {...S0}}}
 function save(){try{const t=tm();if(t&&t.players.length)t.saved=JSON.parse(JSON.stringify(t.players))}catch(e){}
 try{localStorage.setItem('hoops',JSON.stringify(S))}catch(e){}}
 const tm=()=>S.teams.find(t=>t.id===S.tid)||S.teams[0];
-let pendPhoto=null,photoTarget=null,editAv=null,lf='all',subs=false,undoOpen=false,lastTap=null,courtEntry=null,chartP='all',cm=null,courtOpenedAt=0,court3=false,ignore3Until=0,pcard=null,profFrom='home',pickOpen=false,pickSel=[],profSortOpen=false;
+let pendPhoto=null,photoTarget=null,editAv=null,lf='all',subs=false,undoOpen=false,flf='all',finEdit=null,lastTap=null,courtEntry=null,chartP='all',cm=null,courtOpenedAt=0,court3=false,ignore3Until=0,assistTimer=null,pendingAssist=null,assistFor=null,pcard=null,profFrom='home',pickOpen=false,pickSel=[],profSortOpen=false;
 const EMO=['🏀','🔥','⭐','👑','🦁','🐯','🐺','🦅','🐻','🦈','🚀','⚡','💪','😎','🎯','🛡️'];
 const COL=['#c0392b','#d35400','#1e8449','#117a8b','#1f5fbf','#6c3fb5','#b03a7a','#34495e'];
 function avPanel(p){return `<div class="avp"><div class="emo">${EMO.map(e=>`<button data-emo="${e}" class="${p.emoji===e&&!p.photo?'sel':''}">${e}</button>`).join('')}</div><div class="cols">${COL.map(c=>`<button data-col="${c}" style="background:${c}" class="${p.color===c&&!p.photo?'sel':''}" aria-label="Pick color"></button>`).join('')}</div><div class="row"><label class="lbtn" for="cam" data-pt="${p.id}">Take photo</label><label class="lbtn" for="file" data-pt="${p.id}">From gallery</label></div><div class="row"><button data-clr="${p.id}">Reset</button><button class="p" data-done="1">Done</button></div></div>`}
@@ -220,7 +238,8 @@ function teamsUI(){const n=S.note?`<div class="empty" style="margin-bottom:8px">
  <div class="row"><button class="d" id="delteam">Delete ${esc(tm().name)}</button></div>
  <h1>Opponent</h1><div class="row"><input id="opn" maxlength="24" placeholder="Opponent name" value="${S.opp==='Away'?'':esc(S.opp)}"></div>${leagueUI()}<h1>Game format</h1><div class="tabs"><button data-fmt="q" class="${S.fmt!=='h'?'on':''}">4 quarters</button><button data-fmt="h" class="${S.fmt==='h'?'on':''}">2 halves</button></div>`}
 function allGames(){const o=S.games.filter(g=>!(S.log.length&&g.id===S.gid)).map(g=>({at:g.at,opp:g.opp,team:g.team,players:g.players,log:g.log}));
- if(S.log.length)o.push({at:Date.now(),cur:true,opp:S.opp,team:tm().name,players:tm().players,log:S.log});return o}
+ if(S.log.length)o.push({at:Date.now(),cur:true,opp:S.opp,team:tm().name,players:tm().players,log:S.log});
+ S.finished.forEach(g=>o.push({at:g.at,opp:g.opp,team:g.team,players:g.players,log:g.log}));return o}
 function statsIn(log,pid){const s={f2m:0,f2x:0,f3m:0,f3x:0,ftm:0,ftx:0,reb:0,ast:0,stl:0,blk:0,tov:0,pf:0,n:0};
  log.forEach(e=>{if(e.p===pid&&Object.prototype.hasOwnProperty.call(s,e.t)&&e.t!=='n'){s[e.t]++;s.n++}});
  s.pts=2*s.f2m+3*s.f3m+s.ftm;s.fgm=s.f2m+s.f3m;s.fga=s.fgm+s.f2x+s.f3x;s.tpm=s.f3m;s.tpa=s.f3m+s.f3x;s.fta=s.ftm+s.ftx;return s}
@@ -270,9 +289,9 @@ function numEdit(p){return `<div class="avp"><div class="row" style="margin-top:
 function profEdit(pr){return `<div class="avp"><div class="row" style="margin-top:0"><input class="n" id="pe-n" inputmode="numeric" maxlength="3" value="${esc(pr.num)}" aria-label="Number"><input id="pe-m" maxlength="20" value="${esc(pr.name)}" aria-label="Name"></div><div class="row"><select id="pe-p" aria-label="Position"><option value="">No position</option>${['PG','SG','SF','PF','C'].map(x=>`<option${pr.pos===x?' selected':''}>${x}</option>`).join('')}</select><button class="p" data-psave="${pr.id}">Save details</button></div></div>${avPanel(pr)}`}
 function profUI(){const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" id="pback">${profFrom==='roster'?'Roster':'Home'}</button><h1 style="margin:0;font-size:30px">Player Profiles</h1></div>`;
  const form=`<div style="color:var(--mut);font-size:14px;margin-top:8px">Profiles are saved players you can add to any roster.</div><h1>New profile</h1><div class="row"><input class="n" id="fn" inputmode="numeric" maxlength="3" placeholder="#"><input id="fm" maxlength="20" placeholder="Name"></div><div class="row"><select id="fp" aria-label="Position"><option value="">Position (optional)</option>${['PG','SG','SF','PF','C'].map(x=>`<option>${x}</option>`).join('')}</select><button class="p" id="addprof">Create</button></div>`;
- const list=S.profiles.length?sortedProfiles().map(pr=>`<div class="rl"><button class="avb" data-edav="${pr.id}" aria-label="Edit ${esc(pr.name)}">${av(pr,44)}</button><span><b class="num" style="font-size:20px">#${esc(pr.num)}</b> ${esc(pr.name)}${pr.pos?` <small style="color:var(--mut)">${esc(pr.pos)}</small>`:''}</span><button class="favb ${pr.fav?'on':''}" data-fav="${pr.id}" aria-pressed="${!!pr.fav}" aria-label="${pr.fav?'Remove':'Mark'} ${esc(pr.name)} as favorite">${BB(26,pr.fav)}</button><button data-pdel="${pr.id}">Delete</button></div>${editAv===pr.id?profEdit(pr):''}`).join(''):`<div class="empty">No profiles yet. Create one above.</div>`;
+ const list=S.profiles.length?sortedProfiles().map(pr=>`<div class="rl"><button class="avb" data-edav="${pr.id}" aria-label="Edit ${esc(pr.name)}">${av(pr,44)}</button><button class="rn" data-pstats="${pr.id}" aria-label="Show all stats for ${esc(pr.name)}"><b class="num" style="font-size:20px">#${esc(pr.num)}</b> ${esc(pr.name)}${pr.pos?` <small style="color:var(--mut)">${esc(pr.pos)}</small>`:''}</button><button class="favb ${pr.fav?'on':''}" data-fav="${pr.id}" aria-pressed="${!!pr.fav}" aria-label="${pr.fav?'Remove':'Mark'} ${esc(pr.name)} as favorite">${BB(26,pr.fav)}</button><button data-pdel="${pr.id}">Delete</button></div>${editAv===pr.id?profEdit(pr):''}`).join(''):`<div class="empty">No profiles yet. Create one above.</div>`;
  const sk=S.profSort||'name',skl=(SORTS.find(x=>x[0]===sk)||SORTS[0])[1];
- const sortUI=`<div style="display:flex;justify-content:space-between;align-items:center"><h1>All profiles</h1><button class="sm" id="sortbtn" aria-expanded="${profSortOpen}">Sort: ${skl}</button></div>`+(profSortOpen?`<div class="chips" style="margin-bottom:8px">${SORTS.map(([k,l])=>`<button data-sort="${k}" class="${sk===k?'on':''}">${l}</button>`).join('')}</div>`:'')+`<div style="color:var(--mut);font-size:13px;margin:0 2px 8px">${BB(13,true)} Favorites always stay on top. Tap a circle to edit details and avatar.</div>`;
+ const sortUI=`<div style="display:flex;justify-content:space-between;align-items:center"><h1>All profiles</h1><button class="sm" id="sortbtn" aria-expanded="${profSortOpen}">Sort: ${skl}</button></div>`+(profSortOpen?`<div class="chips" style="margin-bottom:8px">${SORTS.map(([k,l])=>`<button data-sort="${k}" class="${sk===k?'on':''}">${l}</button>`).join('')}</div>`:'')+`<div style="color:var(--mut);font-size:13px;margin:0 2px 8px">${BB(13,true)} Favorites always stay on top. Tap a name to see all stats, or a circle to edit details and avatar.</div>`;
  return head+form+sortUI+list}
 const NBA=[['ATL','Atlanta Hawks','#E03A3E','#C1D32F'],['BOS','Boston Celtics','#007A33','#BA9653'],['BKN','Brooklyn Nets','#111111','#FFFFFF'],['CHA','Charlotte Hornets','#1D1160','#00788C'],['CHI','Chicago Bulls','#CE1141','#000000'],['CLE','Cleveland Cavaliers','#860038','#FDBB30'],['DAL','Dallas Mavericks','#00538C','#B8C4CA'],['DEN','Denver Nuggets','#0E2240','#FEC524'],['DET','Detroit Pistons','#C8102E','#1D42BA'],['GSW','Golden State Warriors','#1D428A','#FFC72C'],['HOU','Houston Rockets','#CE1141','#C4CED4'],['IND','Indiana Pacers','#002D62','#FDBB30'],['LAC','LA Clippers','#C8102E','#1D428A'],['LAL','Los Angeles Lakers','#552583','#FDB927'],['MEM','Memphis Grizzlies','#5D76A9','#12173F'],['MIA','Miami Heat','#98002E','#F9A01B'],['MIL','Milwaukee Bucks','#00471B','#EEE1C6'],['MIN','Minnesota Timberwolves','#0C2340','#78BE20'],['NOP','New Orleans Pelicans','#0C2340','#C8102E'],['NYK','New York Knicks','#006BB6','#F58426'],['OKC','Oklahoma City Thunder','#007AC1','#EF3B24'],['ORL','Orlando Magic','#0077C0','#C4CED4'],['PHI','Philadelphia 76ers','#006BB6','#ED174C'],['PHX','Phoenix Suns','#1D1160','#E56020'],['POR','Portland Trail Blazers','#E03A3E','#000000'],['SAC','Sacramento Kings','#5A2D81','#63727A'],['SAS','San Antonio Spurs','#2B2B2B','#C4CED4'],['TOR','Toronto Raptors','#CE1141','#000000'],['UTA','Utah Jazz','#002B5C','#F9A01B'],['WAS','Washington Wizards','#002B5C','#E31837']];
 const THEMES=[['def','Courtside classic','#14213d','#f4b400']].concat(NBA);
@@ -293,6 +312,46 @@ function settingsUI(){const cur=S.theme||'def';
  return head+`<h1>Theme</h1><div style="color:var(--mut);font-size:14px;margin:-4px 2px 10px">Pick a team and the colors change across the whole app.</div><div class="thgrid">${THEMES.map(([k,n,p,s2])=>`<button class="thm ${k===cur?'on':''}" data-th="${k}" aria-pressed="${k===cur}"><span class="sws"><i style="background:${p}"></i><i style="background:${s2}"></i></span><span>${esc(n)}</span></button>`).join('')}</div>`}
 function hofList(){return playerIndex().filter(e=>{const pr=S.profiles.find(x=>'pr:'+x.id===e.key);return pr&&pr.fav})}
 function hofSub(){const n=hofList().length;if(n)return n+' favorite'+(n===1?'':'s')+' · tap to see their cards';return S.profiles.some(x=>x.fav)?'Your favorites show up here once they have stats':'Mark favorites in Player profiles to add them here'}
+function closeAssist(){document.getElementById('assist').classList.remove('on');assistFor=null}
+function openAssist(sh){if(!S.log.includes(sh))return;
+ const others=S.court.filter(id=>id!==sh.p&&tm().players.some(p=>p.id===id)).map(id=>tm().players.find(p=>p.id===id));
+ if(!others.length)return;const sc=tm().players.find(p=>p.id===sh.p);assistFor=sh;
+ document.getElementById('assist').innerHTML=`<div class="card"><div style="font:700 22px Barlow,sans-serif">Assist?</div><div style="color:var(--mut);font-size:14px;margin:2px 0 10px">${sc?esc(sc.name)+' made a ':'Made a '}${sh.t==='f3m'?'3-pointer':'2-pointer'}. Who assisted?</div><div class="players">${others.map(p=>`<button class="pl" data-as="${p.id}"><span style="display:flex;align-items:center;gap:6px">${av(p,34)}<span class="num">${esc(p.num)}</span></span><small>${esc(p.name)}</small><em>${stats(p.id).ast} ast</em></button>`).join('')}</div><div class="row"><button class="p" id="assistnone">No assist</button></div></div>`;
+ document.getElementById('assist').classList.add('on')}
+function closeStat(){document.getElementById('pstat').classList.remove('on')}
+function statPopup(id){const pr=S.profiles.find(x=>x.id===id);if(!pr)return;
+ const e=playerIndex().find(x=>x.key==='pr:'+id),gs=e?e.games.slice().sort((a,b)=>b.g.at-a.g.at):[],n=gs.length;
+ const T=k=>gs.reduce((a,x)=>a+x.s[k],0),A=k=>n?(T(k)/n).toFixed(1):'0.0',pc=(m,a)=>a?Math.round(m/a*100)+'%':'-',mx=k=>n?Math.max(...gs.map(x=>x.s[k])):0;
+ const nums=[...new Set(gs.slice().reverse().map(x=>x.num).filter(x=>x&&x!=='-'))];
+ const lab=x=>(x.g.cur?'Live':new Date(x.g.at).toLocaleDateString(undefined,{month:'short',day:'numeric'}))+' vs '+esc(x.g.opp);
+ const tile=(v,l)=>`<div class="tile"><b>${v}</b><span>${l}</span></div>`;
+ const cell=(l,v)=>`<div><i>${l}</i><u>${v}</u></div>`;
+ const head=`<div class="pch">${av(pr,56)}<div><b class="num" style="font-size:26px;line-height:1.1">${pr.fav?BB(20,true)+' ':''}#${esc(pr.num)} ${esc(pr.name)}</b><div class="pcs">${pr.pos?esc(pr.pos)+' · ':''}${n} game${n===1?'':'s'}${nums.length>1?' · wore '+nums.map(x=>'#'+esc(x)).join(', '):''}</div></div></div>`;
+ let body;
+ if(!n)body=`<div class="empty">No games yet. Stats show up here after this player gets a stat in a game.</div>`;
+ else{const t=k=>T(k);
+  body=`<div class="ph">Per-game averages</div><div class="tiles">${tile(A('pts'),'PTS')}${tile(A('reb'),'REB')}${tile(A('ast'),'AST')}${tile(A('stl'),'STL')}${tile(A('blk'),'BLK')}${tile(A('tov'),'TO')}${tile(pc(t('fgm'),t('fga')),'FG%')}${tile(pc(t('tpm'),t('tpa')),'3P%')}${tile(pc(t('ftm'),t('fta')),'FT%')}</div>
+  <div class="ph">Career totals</div><div class="ptot">${cell('PTS',t('pts'))}${cell('FG',t('fgm')+'-'+t('fga'))}${cell('3P',t('tpm')+'-'+t('tpa'))}${cell('FT',t('ftm')+'-'+t('fta'))}${cell('GP',n)}${cell('REB',t('reb'))}${cell('AST',t('ast'))}${cell('STL',t('stl'))}${cell('BLK',t('blk'))}${cell('TO',t('tov'))}</div>
+  <div class="ph">Career highs</div><div class="ptot">${cell('PTS',mx('pts'))}${cell('REB',mx('reb'))}${cell('AST',mx('ast'))}${cell('STL',mx('stl'))}${cell('BLK',mx('blk'))}</div>
+  <div class="ph">Game log</div>${gs.map(x=>{const s=x.s;return `<div class="glog"><div class="gl1"><span>${lab(x)}${nums.length>1?' · #'+esc(x.num):''}</span><b>${s.pts} PTS</b></div><div class="gl2">FG ${s.fgm}-${s.fga} · 3P ${s.tpm}-${s.tpa} · FT ${s.ftm}-${s.fta} · REB ${s.reb} · AST ${s.ast} · STL ${s.stl} · BLK ${s.blk} · TO ${s.tov} · PF ${s.pf}</div></div>`}).join('')}`}
+ document.getElementById('pstat').innerHTML=`<div class="card pc">${head}${body}<div class="row"><button class="p" id="pstatclose">Close</button></div></div>`;
+ document.getElementById('pstat').classList.add('on')}
+function endGame(){if(!S.log.length)return false;const t=tm();
+ const g={id:S.gid||'g'+Date.now(),at:Date.now(),tid:S.tid,team:t.name,opp:S.opp,league:S.league,court:S.court.slice(),fmt:S.fmt,q:S.q,players:JSON.parse(JSON.stringify(t.players)),log:JSON.parse(JSON.stringify(S.log)),final:true};
+ S.finished.unshift(g);S.games=S.games.filter(x=>x.id!==g.id);
+ S.log=[];S.q=1;S.gid=null;S.sel=null;S.court=[];subs=false;t.players=[];S.opp='Away';S.league='';S.prevRoster=null;S.lastMsg='';return true}
+function finScore(g){const [h,a]=swap(g,()=>[home(),away()]);const ed=g.fh!=null&&g.fa!=null;return ed?[g.fh,g.fa,true,h,a]:[h,a,false,h,a]}
+function finUI(){const back=(id,t)=>`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" ${id}>${t}</button><h1 style="margin:0;font-size:30px">Finished Games</h1></div>`;
+ const panel=g=>{const [h,a,ed,th,ta]=finScore(g);return `<div class="avp"><div style="font-size:13px;color:var(--mut);margin-bottom:8px">Set the final score for the game record. Player stats stay exactly as you tracked them.</div><div class="row" style="margin-top:0"><div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--mut);margin:0 2px 3px">${esc(g.team)}</div><input id="fe-h" style="width:100%" inputmode="numeric" maxlength="3" value="${h}" aria-label="${esc(g.team)} score"></div><div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--mut);margin:0 2px 3px">${esc(g.opp)}</div><input id="fe-a" style="width:100%" inputmode="numeric" maxlength="3" value="${a}" aria-label="${esc(g.opp)} score"></div></div><div class="row"><button class="p" data-fsave="${g.id}">Save score</button>${ed?`<button data-freset="${g.id}">Use tracked (${th}-${ta})</button>`:''}<button data-fcancel="1">Cancel</button></div></div>`};
+ if(S.fview){const g=S.finished.find(x=>x.id===S.fview);if(g){const ln=lgName(g.league),[h,a,ed,th,ta]=finScore(g);
+  return back('id="finback"','Back')+`<h1>${esc(g.team)} ${h} - ${a} ${esc(g.opp)} <i class="fbadge">FINAL</i></h1><div style="color:var(--mut);margin:-4px 0 8px">${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''} · locked, only the score can be edited${ed?' · score edited (tracked players total '+th+'-'+ta+')':''}</div><div class="row" style="margin:0 0 8px"><button data-fedit="${g.id}">Edit final score</button></div>${finEdit===g.id?panel(g):''}<div style="color:var(--mut);font-size:13px;margin:6px 2px">The player stats below are only for the players you tracked.</div>`+swap(g,box)}}
+ if(!S.finished.length)return back('data-home="1"','Home')+`<div class="empty" style="margin-top:14px">No finished games yet. Tap End game in the Game tab when a game is over. Finished games are locked, except the final score, which you can edit.</div>`;
+ const chips=[['all','All']].concat(S.leagues.map(l=>[l.id,l.name]),[['none','No league']]);
+ if(!chips.some(c=>c[0]===flf))flf='all';
+ const list=S.finished.filter(g=>flf==='all'||(flf==='none'?!lgName(g.league):g.league===flf));let w=0,l=0;
+ const cards=list.map(g=>{const [h,a,ed,th,ta]=finScore(g);if(h>a)w++;else if(a>h)l++;const ln=lgName(g.league);
+  return `<div class="line" style="display:block"><b class="num" style="font-size:20px">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}</b> <i class="fbadge">FINAL</i><br><span>${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''}${ed?' · score edited':''}</span><div class="row"><button data-fview="${g.id}">View</button><button data-fedit="${g.id}">Edit score</button></div>${finEdit===g.id?panel(g):''}</div>`}).join('');
+ return back('data-home="1"','Home')+`<div style="color:var(--mut);font-size:14px;margin:8px 2px 4px">Final games are locked. You can view them and edit the final score.</div><div class="chips" style="margin:8px 0">${chips.map(c=>`<button data-flf="${c[0]}" class="${flf===c[0]?'on':''}">${esc(c[1])}</button>`).join('')}</div>${list.length?`<div style="color:var(--mut);margin:6px 2px 8px">Record: ${w}-${l} · ${list.length} game${list.length===1?'':'s'}</div>`:''}`+(cards||'<div class="empty">No finished games in this group.</div>')}
 function hofUI(){const idx=hofList();
  const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Hall of Fame</h1></div>`;
  if(!idx.length){const hasFav=S.profiles.some(x=>x.fav);return head+`<div class="empty" style="margin-top:14px">${hasFav?'Your favorites don\'t have any stats yet. Their cards appear here after they play.':'No favorites yet. Only players marked as favorites get a card in the Hall of Fame.'}</div><button class="big" data-go="prof" data-from="home" style="margin-top:12px">Player profiles<small>Tap the basketball icon to mark favorites</small></button>`}
@@ -333,7 +392,7 @@ function homeUI(){
  return `<div class="hero">${BALL}<button class="gear" data-go="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><div class="ht"><div class="num" style="font-size:48px;font-weight:700;line-height:1">Courtside</div><div style="margin-top:4px">Live basketball stats</div></div></div>
  ${live?`<button class="big p" data-go="continue">Continue game<small>${esc(tm().name)} ${home()} - ${away()} ${esc(S.opp)} · ${plab(S.q)}</small></button>`:''}
  <button class="big ${live?'':'p'}" data-go="new">New game<small>${live?'Saves the current game, then starts fresh':'Starts fresh with an empty roster'}</small></button>
- <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button>
+ <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button><button class="big" data-go="fin">Finished games<small>${S.finished.length} final · locked, view only</small></button>
  
  <button class="big hof" data-go="hof">Hall of Fame<small>${hofSub()}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved · pick them for any roster</small></button>${recent?`<h1>Recent games</h1>${recent}`:''}`}
 const lgName=id=>(S.leagues.find(l=>l.id===id)||{}).name||'';
@@ -362,7 +421,7 @@ function home(){return tm().players.reduce((a,p)=>a+stats(p.id).pts,0)}
 function add(t,p){S.log.push({p,t,q:S.q});S.lastMsg=(p==='away'?'':(tm().players.find(x=>x.id===p)||{}).name+': ')+LBL[t]+' ('+plab(S.q)+')';save();draw()}
 function undoType(ts){const i=S.log.map((e,k)=>e.p===S.sel&&ts.includes(e.t)?k:-1).filter(k=>k>=0).pop();
  if(i===undefined){toast('Nothing to undo');return}
- const e=S.log.splice(i,1)[0];S.lastMsg='Undid '+LBL[e.t];save();draw();toast(S.lastMsg)}
+ const e=S.log.splice(i,1)[0];if(e.sid)S.log=S.log.filter(x=>x.af!==e.sid);S.lastMsg='Undid '+LBL[e.t];save();draw();toast(S.lastMsg)}
 const O6=['reb','ast','stl','blk','tov','pf'];
 const cnt=t=>S.log.filter(e=>e.t===t&&(!S.sel||e.p===S.sel)).length;
 function undoPanel(){const p=tm().players.find(x=>x.id===S.sel);return `<div class="avp" id="upanel"><div style="font-weight:600;margin-bottom:8px">Remove one from which stat${p?' for '+esc(p.name):''}?</div><div class="grid g3">${O6.map(t=>`<button class="st o" data-undost="${t}"${cnt(t)?'':' disabled'}>${LBL[t]} <small>${cnt(t)}</small></button>`).join('')}</div><div class="row"><button id="undocancel">Cancel</button></div></div>`}
@@ -374,7 +433,7 @@ const dot=e=>e.t.endsWith('m')?`<circle cx="${e.x}" cy="${e.y}" r="9" fill="var(
 function openCourt(e){courtEntry=e;courtOpenedAt=Date.now();court3=(e.t==='f3m'||e.t==='f3x');const p=tm().players.find(x=>x.id===e.p);
  document.getElementById('court').innerHTML=`<div class="card"><div style="font-weight:600;margin-bottom:8px">${p?esc(p.name)+': ':''}${LBL[e.t]}. Tap where the shot was taken.</div>${courtSvg('cs',e.x!==undefined?dot(e):'')}<div class="row"><button id="courtskip">Skip</button></div></div>`;
  document.getElementById('court').classList.add('on')}
-function closeCourt(){if(court3){ignore3Until=Date.now()+600;court3=false}courtEntry=null;cm=null;document.getElementById('court').classList.remove('on')}
+function closeCourt(){if(court3){ignore3Until=Date.now()+600;court3=false}courtEntry=null;cm=null;document.getElementById('court').classList.remove('on');if(pendingAssist){const pe=pendingAssist;pendingAssist=null;setTimeout(()=>openAssist(pe),200)}}
 function shotChart(){const all=S.log.filter(e=>e.x!==undefined&&SHOTS.includes(e.t));
  if(chartP!=='all'&&!tm().players.some(p=>p.id===chartP))chartP='all';
  if(!all.length&&chartP==='all')return '';
@@ -391,8 +450,8 @@ function undoAway(){let i=-1;for(let k=S.log.length-1;k>=0;k--){if(S.log[k].p===
  if(i<0){toast('No away points to undo');return}
  const e=S.log.splice(i,1)[0];S.lastMsg='Undid '+LBL[e.t];save();draw();toast(S.lastMsg)}
 function draw(){
- const onHome=S.screen==='home'||S.screen==='hof'||S.screen==='prof'||S.screen==='settings';document.querySelector('.board').style.display=onHome?'none':'';document.getElementById('tabs').style.display=onHome?'none':'';
- if(onHome){document.getElementById('main').innerHTML=S.screen==='hof'?hofUI():S.screen==='prof'?profUI():S.screen==='settings'?settingsUI():homeUI();return}
+ const onHome=S.screen==='home'||S.screen==='hof'||S.screen==='prof'||S.screen==='settings'||S.screen==='fin';document.querySelector('.board').style.display=onHome?'none':'';document.getElementById('tabs').style.display=onHome?'none':'';
+ if(onHome){document.getElementById('main').innerHTML=S.screen==='hof'?hofUI():S.screen==='prof'?profUI():S.screen==='settings'?settingsUI():S.screen==='fin'?finUI():homeUI();return}
  document.getElementById('hs').textContent=home();
  document.getElementById('as').textContent=away();
  document.getElementById('hn').textContent=tm().name;document.getElementById('an').textContent=S.opp;
@@ -414,7 +473,7 @@ function game(){
   <div class="grid g3" style="margin-top:8px">${['reb','ast','stl','blk','tov','pf'].map(k=>`<button class="st o" data-st="${k}">${LBL[k]} <small>${s[k]}</small></button>`).join('')}</div>`}
  else h+=`<div class="empty" style="margin-top:12px">Tap a player to log a stat.</div>`;
  h+=`<h1>${esc(S.opp)}</h1><div class="grid g4"><button class="st o" data-st="a1" data-away="1">+1</button><button class="st o" data-st="a2" data-away="1">+2</button><button class="st o" data-st="a3" data-away="1">+3</button><button class="st u" id="undoaway" aria-label="Undo last away points">Undo</button></div>
- <div id="last">${esc(S.lastMsg||'')}</div>${undoOpen?undoPanel():''}<div class="row"><button class="d" id="undo" aria-label="Undo last rebound, assist, steal, block, turnover or foul">Undo stat</button><button id="savegame">Save game</button><button class="p" id="newgame">New game</button></div>`;
+ <div id="last">${esc(S.lastMsg||'')}</div>${undoOpen?undoPanel():''}<div class="row"><button class="d" id="undo" aria-label="Undo last rebound, assist, steal, block, turnover or foul">Undo stat</button><button id="savegame">Save game</button><button class="p" id="newgame">New game</button></div><div class="row"><button class="d" id="endgame">End game</button></div>`;
  return h}
 function box(){return boxMain()+shotChart()}
 function boxMain(){
@@ -440,7 +499,7 @@ document.addEventListener('click',e=>{if(!(e.target.closest&&(e.target.closest('
   const is3=y>=328?(x<30||x>470):Math.hypot(x-250,y-417.5)>237.5;
   add((is3?'f3':'f2')+cm.r,pl.id);const en=S.log[S.log.length-1];en.x=x;en.y=y;cm.added.push(en);save();renderChartModal();
   toast((is3?'3PT ':'2PT ')+(cm.r==='m'?'made':'missed')+' added for '+pl.name);return}
- if(e.target.id==='court'&&!(court3&&Date.now()-courtOpenedAt<350))closeCourt()},true);
+ if(e.target.id==='court'&&!(court3&&Date.now()-courtOpenedAt<350))closeCourt();if(e.target.id==='pstat')closeStat();if(e.target.id==='assist')closeAssist()},true);
 document.addEventListener('click',e=>{const l=e.target.closest&&e.target.closest('label[data-pt]');if(l)photoTarget=l.dataset.pt},true);
 document.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;const d=b.dataset;
@@ -458,6 +517,19 @@ document.addEventListener('click',e=>{
  else if(d.clr){const p=findP(d.clr);if(p){p.photo='';p.emoji='';p.color='';linkSync(p)}save();draw()}
  else if(b.id==='gohome'){S.screen='home';draw()}
  else if(d.sg){const pr=S.profiles.find(x=>x.id===d.sg);if(pr){document.getElementById('pm').value=pr.name;document.getElementById('pn').value=pr.num==='-'?'':pr.num;const sb=document.getElementById('psug');if(sb)sb.hidden=true;toast('Selected '+pr.name+'. Change the number if needed, then tap Add.')}}
+ else if(b.id==='endgame'){if(!S.log.length){toast('Log some stats before ending the game');return}
+  if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again to end the game. It will be locked.';setTimeout(()=>{if(b.isConnected&&b.dataset.c){delete b.dataset.c;b.textContent='End game'}},4000);return}
+  endGame();S.screen='home';save();draw();window.scrollTo(0,0);toast('Game ended. It is now under Finished games.')}
+ else if(d.go==='fin'){S.screen='fin';S.fview=null;finEdit=null;draw();window.scrollTo(0,0)}
+ else if(d.fedit){finEdit=finEdit===d.fedit?null:d.fedit;draw()}
+ else if(d.fcancel){finEdit=null;draw()}
+ else if(d.fsave){const g=S.finished.find(x=>x.id===d.fsave);if(!g)return;const h=document.getElementById('fe-h').value.trim(),a=document.getElementById('fe-a').value.trim();
+  if(!/^\d{1,3}$/.test(h)||!/^\d{1,3}$/.test(a)){toast('Enter a whole number for each score');return}
+  g.fh=parseInt(h,10);g.fa=parseInt(a,10);finEdit=null;save();draw();toast('Final score updated')}
+ else if(d.freset){const g=S.finished.find(x=>x.id===d.freset);if(g){delete g.fh;delete g.fa}finEdit=null;save();draw();toast('Using the tracked score again')}
+ else if(d.fview){S.fview=d.fview;draw();window.scrollTo(0,0)}
+ else if(b.id==='finback'){S.fview=null;draw()}
+ else if(d.flf){flf=d.flf;draw()}
  else if(d.go==='settings'){S.screen='settings';draw();window.scrollTo(0,0)}
  else if(d.th){S.theme=d.th;applyTheme();save();draw();const t=THEMES.find(x=>x[0]===d.th);toast((t?t[1]:'Theme')+' theme applied')}
  else if(d.go==='prof'){profFrom=d.from||'home';S.screen='prof';editAv=null;draw();window.scrollTo(0,0)}
@@ -470,6 +542,10 @@ document.addEventListener('click',e=>{
  else if(b.id==='addprof'){const n=document.getElementById('fn').value.trim(),m=document.getElementById('fm').value.trim(),po=document.getElementById('fp').value;if(!m){toast('Enter a name');return}
   S.profiles.push({id:'pr'+Date.now(),name:m,num:n||'-',pos:po,photo:'',emoji:'',color:''});save();draw();toast('Profile created')}
  else if(d.rnum){const p=tm().players.find(x=>x.id===d.rnum);if(!p)return;const v=document.getElementById('rn').value.trim();if(!v){toast('Enter a number');return}p.num=v;save();draw();toast('Jersey number updated')}
+ else if(d.as){const sh=assistFor;closeAssist();if(!sh||!S.log.includes(sh))return;sh.sid=sh.sid||'s'+Date.now()+Math.random().toString(36).slice(2,5);S.log.push({p:d.as,t:'ast',q:sh.q,af:sh.sid});const ap=tm().players.find(x=>x.id===d.as);S.lastMsg='Assist: '+(ap?ap.name:'');save();draw();toast(S.lastMsg)}
+ else if(b.id==='assistnone'){closeAssist()}
+ else if(d.pstats){statPopup(d.pstats)}
+ else if(b.id==='pstatclose'){closeStat()}
  else if(d.fav){const pr=S.profiles.find(x=>x.id===d.fav);if(pr){pr.fav=!pr.fav;save();draw();toast(pr.fav?pr.name+' added to favorites':pr.name+' removed from favorites')}}
  else if(b.id==='sortbtn'){profSortOpen=!profSortOpen;draw()}
  else if(d.sort){S.profSort=d.sort;profSortOpen=false;save();draw()}
@@ -510,11 +586,12 @@ document.addEventListener('click',e=>{
  else if(b.id==='courtskip'){closeCourt()}
  else if(b.id==='chartbtn'){cm={p:S.sel||'all',r:'m',added:[]};renderChartModal()}
  else if(d.res&&cm){cm.r=d.res;renderChartModal()}
- else if(b.id==='csundo'&&cm){const en=cm.added.pop();if(!en){toast('Nothing to undo here');return}const i=S.log.indexOf(en);if(i>=0)S.log.splice(i,1);save();draw();renderChartModal();toast('Removed last shot')}
+ else if(b.id==='csundo'&&cm){const en=cm.added.pop();if(!en){toast('Nothing to undo here');return}const i=S.log.indexOf(en);if(i>=0)S.log.splice(i,1);if(en.sid)S.log=S.log.filter(x=>x.af!==en.sid);save();draw();renderChartModal();toast('Removed last shot')}
  else if(d.cp){chartP=d.cp;draw();const el=document.getElementById('chartsec');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
  else if(d.st){const now=Date.now(),three=d.st==='f3m'||d.st==='f3x';if(three&&now<ignore3Until)return;
-  if(!d.away&&SHOTS.includes(d.st)&&lastTap&&lastTap.t===d.st&&lastTap.p===S.sel&&now-lastTap.at<(three?550:400)&&S.log.includes(lastTap.e)){openCourt(lastTap.e);lastTap=null;return}
-  add(d.st,d.away?'away':S.sel);if(!d.away&&SHOTS.includes(d.st))lastTap={t:d.st,p:S.sel,at:now,e:S.log[S.log.length-1]}}
+  if(!d.away&&SHOTS.includes(d.st)&&lastTap&&lastTap.t===d.st&&lastTap.p===S.sel&&now-lastTap.at<(three?550:400)&&S.log.includes(lastTap.e)){clearTimeout(assistTimer);if(d.st==='f2m'||d.st==='f3m')pendingAssist=lastTap.e;openCourt(lastTap.e);lastTap=null;return}
+  add(d.st,d.away?'away':S.sel);if(!d.away&&SHOTS.includes(d.st))lastTap={t:d.st,p:S.sel,at:now,e:S.log[S.log.length-1]};
+  if(!d.away&&(d.st==='f2m'||d.st==='f3m')){const en=S.log[S.log.length-1];clearTimeout(assistTimer);assistTimer=setTimeout(()=>openAssist(en),three?560:410)}}
  else if(b.id==='undo')undo();
  else if(b.id==='undoaway')undoAway();
  else if(d.undost){let i=-1;for(let k=S.log.length-1;k>=0;k--){const e=S.log[k];if(e.t===d.undost&&(!S.sel||e.p===S.sel)){i=k;break}}
