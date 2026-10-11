@@ -149,6 +149,11 @@ label.avb{display:inline-block;cursor:pointer}
 .bscroll th:first-child{background:#1b2c52}
 .bscroll tr.t td{border-top:1px solid #b8862b;font-weight:700;background:#f6ecd2}
 .back .ffoot{color:#7a6a4e}
+.sugbox{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-top:6px;max-height:240px;overflow:auto}
+.sug{display:flex;align-items:center;gap:10px;width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 12px;text-align:left;font:600 15px Barlow,sans-serif}
+.sug span{flex:1}
+.sug em{font-style:normal;color:var(--mut);font-size:13px}
+.sugn{padding:12px;color:var(--mut);font-size:14px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:12px}
 .modal.on{display:flex}
 .modal .card{background:var(--card);border-radius:16px;padding:12px;width:100%;max-width:420px}
@@ -186,7 +191,7 @@ function clearInputs(){['file','cam'].forEach(i=>{document.getElementById(i).val
 function shrink(file,cb){const r=new FileReader();r.onerror=()=>{clearInputs();toast('Could not read that photo')};r.onload=()=>{const im=new Image();im.onload=()=>{const n=128,c=document.createElement('canvas');c.width=c.height=n;const m=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,n,n);clearInputs();cb(c.toDataURL('image/jpeg',.75))};im.onerror=()=>{clearInputs();toast('That image format is not supported. Try a JPG or PNG.')};im.src=r.result};r.readAsDataURL(file)}
 let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2500)}
 function swap(g,fn){const b=[S.log,S.fmt,S.teams,S.tid];S.log=g.log;S.fmt=g.fmt;S.teams=[{id:'v',name:g.team,players:g.players}];S.tid='v';try{return fn()}finally{[S.log,S.fmt,S.teams,S.tid]=b}}
-function startNewGame(){const had=saveGame(!!S.gid);const t=tm();S.prevRoster=(!had&&t.players.length)?{team:t.name,players:JSON.parse(JSON.stringify(t.players))}:null;t.players=[];S.log=[];S.q=1;S.gid=null;S.sel=null;S.court=[];subs=false;S.screen='app';S.tab='roster';S.view=null;S.lastMsg='';return had}
+function startNewGame(){const had=saveGame(!!S.gid);const t=tm();S.prevRoster=(!had&&t.players.length)?{team:t.name,players:JSON.parse(JSON.stringify(t.players))}:null;t.players=[];S.log=[];S.q=1;S.gid=null;S.sel=null;S.court=[];subs=false;S.screen='app';S.tab='roster';S.view=null;S.lastMsg='';S.opp='Away';S.league='';return had}
 function reuseUI(){const o=[];const sv=tm().saved||[];if(!tm().players.length&&sv.length)o.push({k:'saved',t:tm().name+' saved roster',n:sv.length,d:''});
  if(S.prevRoster&&!sv.length)o.push({k:'prev',t:'Previous roster ('+S.prevRoster.team+')',n:S.prevRoster.players.length,d:''});
  S.games.forEach(g=>o.push({k:g.id,t:g.team+' vs '+g.opp,n:g.players.length,d:new Date(g.at).toLocaleDateString()}));
@@ -201,7 +206,7 @@ function teamsUI(){const n=S.note?`<div class="empty" style="margin-bottom:8px">
  <div style="color:var(--mut);font-size:13px;margin:6px 2px 0">Tap a team to load its saved roster.</div>
  <div class="row"><input id="tn" maxlength="24" placeholder="New team name"><button class="p" id="addteam">Add team</button></div>
  <div class="row"><button class="d" id="delteam">Delete ${esc(tm().name)}</button></div>
- <h1>Opponent</h1><div class="row"><input id="opn" maxlength="24" placeholder="Opponent name" value="${esc(S.opp)}"></div>${leagueUI()}`}
+ <h1>Opponent</h1><div class="row"><input id="opn" maxlength="24" placeholder="Opponent name" value="${S.opp==='Away'?'':esc(S.opp)}"></div>${leagueUI()}`}
 function allGames(){const o=S.games.filter(g=>!(S.log.length&&g.id===S.gid)).map(g=>({at:g.at,opp:g.opp,team:g.team,players:g.players,log:g.log}));
  if(S.log.length)o.push({at:Date.now(),cur:true,opp:S.opp,team:tm().name,players:tm().players,log:S.log});return o}
 function statsIn(log,pid){const s={f2m:0,f2x:0,f3m:0,f3x:0,ftm:0,ftx:0,reb:0,ast:0,stl:0,blk:0,tov:0,pf:0,n:0};
@@ -288,9 +293,9 @@ function homeUI(){
  const recent=S.games.slice(0,3).map(g=>{const [h,a]=swap(g,()=>[home(),away()]);return `<button class="big" data-view="${g.id}">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}<small>${new Date(g.at).toLocaleDateString()}</small></button>`}).join('');
  return `<div class="hero">${BALL}<div class="ht"><div class="num" style="font-size:48px;font-weight:700;line-height:1">Courtside</div><div style="margin-top:4px">Live basketball stats</div></div></div>
  ${live?`<button class="big p" data-go="continue">Continue game<small>${esc(tm().name)} ${home()} - ${away()} ${esc(S.opp)} · ${plab(S.q)}</small></button>`:''}
- <button class="big ${live?'':'p'}" data-go="new">New game<small>${live?'Saves the current game, then clears the roster':'Starts with an empty roster'}</small></button>
+ <button class="big ${live?'':'p'}" data-go="new">New game<small>${live?'Saves the current game, then starts fresh':'Starts fresh with an empty roster'}</small></button>
  <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button>
- <button class="big" data-go="roster">Teams and roster<small>${esc(tm().name)} · ${tm().players.length||(tm().saved||[]).length} players</small></button>
+ 
  <button class="big hof" data-go="hof">Hall of Fame<small>${playerIndex().length?playerIndex().length+' player'+(playerIndex().length===1?'':'s')+' · tap to see their cards':'Player cards appear after you log stats'}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved · pick them for any roster</small></button>${recent?`<h1>Recent games</h1>${recent}`:''}`}
 const lgName=id=>(S.leagues.find(l=>l.id===id)||{}).name||'';
 function leagueUI(){return `<h1>League or tournament</h1><div class="row"><select id="lg" aria-label="League or tournament"><option value="">None</option>${S.leagues.map(l=>`<option value="${l.id}"${l.id===S.league?' selected':''}>${esc(l.name)}</option>`).join('')}</select>${S.league?'<button class="d" id="dellg" style="flex:0 0 90px">Delete</button>':''}</div><div class="row"><input id="ln" maxlength="30" placeholder="New league or tournament"><button class="p" id="addleague">Add</button></div>`}
@@ -382,11 +387,12 @@ function boxMain(){
  return `<div class="wrap"><table><tr><th></th>${hd.map(x=>`<th>${x}</th>`).join('')}</tr>${rows}<tr class="t"><td>Team</td>${keys.map(k=>`<td>${tot[k]}</td>`).join('')}</tr></table></div>
  <h1>By period</h1><div class="wrap"><table><tr><th></th><th>Home</th><th>Away</th></tr>${pq||'<tr><td colspan="3">Nothing logged yet</td></tr>'}</table></div>`}
 function roster(){
- return `<h1>Team</h1>${teamsUI()}<h1>Add a player</h1><div class="row"><input class="n" id="pn" inputmode="numeric" maxlength="3" placeholder="#"><input id="pm" maxlength="20" placeholder="Name"><button class="p" id="addp">Add</button></div>
+ return `<h1>Team</h1>${teamsUI()}<h1>Add a player</h1><div class="row"><input class="n" id="pn" inputmode="numeric" maxlength="3" placeholder="#"><input id="pm" maxlength="20" placeholder="Name"><button class="p" id="addp">Add</button></div><div id="psug" class="sugbox" hidden></div>
  <div class="row"><label class="lbtn" for="cam" data-pt="new">Take photo</label><label class="lbtn" id="pickphoto" for="file" data-pt="new">${pendPhoto?'Photo added':'From gallery'}</label></div>
  ${profPickUI()}<h1>Roster</h1>${tm().players.length?'<div style="color:var(--mut);font-size:14px;margin:-4px 0 8px">Tap a circle to set an avatar or photo.</div>':''}`+(tm().players.length?tm().players.map(p=>`<div class="rl"><button class="avb" data-edav="${p.id}" aria-label="Edit avatar for ${esc(p.name)}">${av(p,44)}</button><span><b class="num" style="font-size:20px">#${esc(p.num)}</b> ${esc(p.name)}</span><button data-rm="${p.id}">Remove</button></div>${editAv===p.id?numEdit(p)+avPanel(p):''}`).join(''):`<div class="empty">No players yet. Enter a number and name above.</div>`)
  +`<div class="row" style="margin-top:14px"><button class="p" id="savegame2">Save game</button></div><div style="color:var(--mut);font-size:13px;margin:6px 2px">Saves the roster, opponent, league, format and any stats.</div>`+reuseUI()+`<h1>Game format</h1><div class="tabs"><button data-fmt="q" class="${S.fmt!=='h'?'on':''}">4 quarters</button><button data-fmt="h" class="${S.fmt==='h'?'on':''}">2 halves</button></div>`}
-document.addEventListener('click',e=>{const tc=e.target.closest&&e.target.closest('.tcard');if(tc){tc.classList.toggle('flip');return}
+document.addEventListener('click',e=>{if(!(e.target.closest&&(e.target.closest('#psug')||e.target.id==='pm'))){const sb=document.getElementById('psug');if(sb)sb.hidden=true}
+ const tc=e.target.closest&&e.target.closest('.tcard');if(tc){tc.classList.toggle('flip');return}
  const sv=e.target.closest&&e.target.closest('#cs');
  if(sv&&courtEntry){const r=sv.getBoundingClientRect();courtEntry.x=Math.max(0,Math.min(500,Math.round((e.clientX-r.left)/r.width*500)));courtEntry.y=Math.max(0,Math.min(470,Math.round((e.clientY-r.top)/r.height*470)));save();sv.insertAdjacentHTML('beforeend',dot(courtEntry));toast('Shot location saved');setTimeout(closeCourt,300);return}
  const s2=e.target.closest&&e.target.closest('#cs2');
@@ -412,6 +418,7 @@ document.addEventListener('click',e=>{
   t.players=src.map((p,i)=>({...p,id:'p'+Date.now()+i}));S.sel=null;S.court=[];save();draw();toast(t.players.length+' players added')}
  else if(d.clr){const p=findP(d.clr);if(p){p.photo='';p.emoji='';p.color='';linkSync(p)}save();draw()}
  else if(b.id==='gohome'){S.screen='home';draw()}
+ else if(d.sg){const pr=S.profiles.find(x=>x.id===d.sg);if(pr){document.getElementById('pm').value=pr.name;document.getElementById('pn').value=pr.num==='-'?'':pr.num;const sb=document.getElementById('psug');if(sb)sb.hidden=true;toast('Selected '+pr.name+'. Change the number if needed, then tap Add.')}}
  else if(d.go==='prof'){profFrom=d.from||'home';S.screen='prof';editAv=null;draw();window.scrollTo(0,0)}
  else if(b.id==='pback'){editAv=null;if(profFrom==='roster'){S.screen='app';S.tab='roster'}else S.screen='home';draw();window.scrollTo(0,0)}
  else if(b.id==='pickprof'){pickOpen=!pickOpen;pickSel=[];draw()}
@@ -484,6 +491,12 @@ document.addEventListener('change',e=>{if(e.target.id==='file'||e.target.id==='c
  if(e.target.id==='lg'){S.league=e.target.value;const g=S.games.find(x=>x.id===S.gid);if(g)g.league=S.league;save();draw();return}
  if(e.target.dataset&&e.target.dataset.gl){const g=S.games.find(x=>x.id===e.target.dataset.gl);if(g){g.league=e.target.value;if(S.gid===g.id)S.league=g.league;save();draw()}return}
  if(e.target.id==='opn'){S.opp=e.target.value.trim()||'Away';save();draw()}});
+function sugHTML(q){q=(q||'').trim().toLowerCase();const pl=tm().players;
+ const l=S.profiles.filter(pr=>!pl.some(p=>p.pid===pr.id||p.name.trim().toLowerCase()===pr.name.trim().toLowerCase())).filter(pr=>!q||pr.name.toLowerCase().includes(q)||String(pr.num).includes(q)).sort((a,b)=>a.name.localeCompare(b.name)).slice(0,40);
+ return l.length?l.map(pr=>`<button class="sug" data-sg="${pr.id}">${av(pr,30)}<span><b class="num">#${esc(pr.num)}</b> ${esc(pr.name)}</span><em>${esc(pr.pos||'')}</em></button>`).join(''):`<div class="sugn">${S.profiles.length?'No matching previous players':'No previous players yet'}</div>`}
+function showSug(){const box=document.getElementById('psug'),inp=document.getElementById('pm');if(!box||!inp)return;box.innerHTML=sugHTML(inp.value);box.hidden=false;box.scrollIntoView({block:'nearest',behavior:'smooth'})}
+document.addEventListener('focusin',e=>{if(e.target.id==='pm')showSug()});
+document.addEventListener('input',e=>{if(e.target.id==='pm')showSug()});
 if(tm().players.length&&S.tab==='roster')S.tab='game';
 draw();
 </script>
