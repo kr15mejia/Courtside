@@ -102,43 +102,43 @@ label.avb{display:inline-block;cursor:pointer}
 .tile{background:var(--card);border-radius:12px;padding:10px 6px;text-align:center}
 .tile b{display:block;font:700 28px/1 "Barlow Condensed","Arial Narrow",sans-serif}
 .tile span{font-size:12px;color:var(--mut)}
-.big.hof{background:linear-gradient(135deg,#f6d36b,#c9921f);color:#2a1b13;box-shadow:none}
+.big.hof{background:linear-gradient(135deg,var(--t2l,#f6d36b),var(--t2,#c9921f));color:var(--t2ink,#2a1b13);box-shadow:none}
 .hofchips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 6px;margin:0 -2px}
 .hofchips button{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:22px;padding:5px 12px 5px 6px;font:600 14px Barlow,sans-serif}
 .hofchips button.on{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
 .tcard{perspective:1400px;width:min(100%,340px);height:492px;margin:12px auto 8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .tin{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
 .tcard.flip .tin{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;border-radius:18px;padding:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 10px 28px rgba(0,0,0,.35);background:linear-gradient(135deg,#f6d36b,#b8862b 38%,#f8e594 55%,#9a6a1c)}
+.face{position:absolute;inset:0;border-radius:18px;padding:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 10px 28px rgba(0,0,0,.35);background:linear-gradient(135deg,var(--t2l,#f6d36b),var(--t2,#b8862b) 38%,var(--t2l,#f8e594) 55%,var(--t2d,#9a6a1c))}
 .face.back{transform:rotateY(180deg)}
 .face .fi{position:relative;height:100%;border-radius:11px;overflow:hidden;display:flex;flex-direction:column;text-shadow:none}
-.front .fi{background:linear-gradient(160deg,#1b2c52,#0b1327);color:#fff}
+.front .fi{background:linear-gradient(160deg,var(--t1d,#1b2c52),var(--t1x,#0b1327));color:#fff}
 .front .fi::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.16) 46%,transparent 60%);pointer-events:none}
-.ft{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 6px;font:700 13px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.18em;color:#f6d36b}
+.ft{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 6px;font:700 13px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.18em;color:var(--t2l,#f6d36b)}
 .ft b{font-size:26px;letter-spacing:0;color:#fff}
-.fphoto{position:relative;height:198px;margin:0 8px;border-radius:10px;overflow:hidden;border:2px solid #f6d36b;background:#c9561a}
+.fphoto{position:relative;height:198px;margin:0 8px;border-radius:10px;overflow:hidden;border:2px solid var(--t2l,#f6d36b);background:#c9561a}
 .fphoto .ball{position:absolute;inset:0;width:100%;height:100%}
 .fav{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.fav .av{border:4px solid #f6d36b;box-shadow:0 6px 18px rgba(0,0,0,.5)}
-.fname{margin:10px 10px 0;padding:4px 8px;text-align:center;font:700 29px/1.1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(90deg,transparent,rgba(246,211,107,.28),transparent)}
-.fsub{text-align:center;font:600 12px Barlow,sans-serif;letter-spacing:.14em;color:#f6d36b;margin:2px 0 8px}
+.fav .av{border:4px solid var(--t2l,#f6d36b);box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.fname{margin:10px 10px 0;padding:4px 8px;text-align:center;font:700 29px/1.1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)}
+.fsub{text-align:center;font:600 12px Barlow,sans-serif;letter-spacing:.14em;color:var(--t2l,#f6d36b);margin:2px 0 8px}
 .fstats{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:0 8px;margin-bottom:6px}
-.fstats div{background:rgba(255,255,255,.08);border:1px solid rgba(246,211,107,.45);border-radius:8px;padding:5px 0 4px;text-align:center}
+.fstats div{background:rgba(255,255,255,.08);border:1px solid var(--t2l,#f6d36b);border-radius:8px;padding:5px 0 4px;text-align:center}
 .fstats b{display:block;font:700 24px/1 "Barlow Condensed","Arial Narrow",sans-serif}
-.fstats span{font:600 11px Barlow,sans-serif;letter-spacing:.1em;color:#f6d36b}
+.fstats span{font:600 11px Barlow,sans-serif;letter-spacing:.1em;color:var(--t2l,#f6d36b)}
 .fstats.s2 b{font-size:20px;color:#ffd9a0}
 .ffoot{margin-top:auto;display:flex;justify-content:space-between;padding:6px 12px 8px;font:600 10px Barlow,sans-serif;letter-spacing:.16em;opacity:.8}
-.front .ffoot{color:#f6d36b}
+.front .ffoot{color:var(--t2l,#f6d36b)}
 .back .fi{background:#f6ecd2;color:#2a1b13}
-.bt{padding:10px 12px 0;font:700 24px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;color:#1b2c52}
+.bt{padding:10px 12px 0;font:700 24px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.12em;color:var(--t1d,#1b2c52)}
 .bn{padding:0 12px 6px;font:600 12px Barlow,sans-serif;color:#7a6a4e}
 .bscroll{flex:1;overflow:auto;margin:0 8px;-webkit-overflow-scrolling:touch}
 .gr{background:#fffaf0;border:1px solid #d9c79a;border-radius:8px;margin-bottom:6px;padding:6px 8px;color:#2a1b13}
-.gr.hl{background:#1b2c52;border-color:#1b2c52;color:#fff}
+.gr.hl{background:var(--t1d,#1b2c52);border-color:var(--t1d,#1b2c52);color:#fff}
 .gr.hl2{background:#f0dfae;border-color:#c9a64e}
 .gh{display:flex;justify-content:space-between;align-items:baseline;font:700 13px Barlow,sans-serif;letter-spacing:.04em}
 .gh b{font:700 22px/1 "Barlow Condensed","Arial Narrow",sans-serif}
-.gr.hl .gh b{color:#f6d36b}
+.gr.hl .gh b{color:var(--t2l,#f6d36b)}
 .gs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px 2px;margin-top:5px;text-align:center}
 .gs i{display:block;font:600 9px Barlow,sans-serif;letter-spacing:.1em;font-style:normal;opacity:.65}
 .gs u{text-decoration:none;font:700 16px/1.1 "Barlow Condensed","Arial Narrow",sans-serif}
@@ -160,6 +160,12 @@ label.avb{display:inline-block;cursor:pointer}
 .rl>button.favb{padding:4px 6px;line-height:0}
 .rl>button.favb .bb{color:var(--mut)}
 .rl>button.favb.on .bb{color:#e8590c}
+.gear{position:absolute;top:12px;right:12px;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.38);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;text-shadow:none}
+.thgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.thm{display:flex;align-items:center;gap:8px;text-align:left;border:2px solid transparent;background:var(--card);color:var(--ink);border-radius:12px;padding:8px;font:600 14px/1.15 Barlow,sans-serif}
+.thm.on{border-color:var(--acc)}
+.sws{display:flex;flex:none;border-radius:50%;overflow:hidden;width:34px;height:34px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.sws i{flex:1}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:12px}
 .modal.on{display:flex}
 .modal .card{background:var(--card);border-radius:16px;padding:12px;width:100%;max-width:420px}
@@ -188,7 +194,7 @@ function load(){try{const s=JSON.parse(localStorage.getItem('hoops')||'null');co
 function save(){try{const t=tm();if(t&&t.players.length)t.saved=JSON.parse(JSON.stringify(t.players))}catch(e){}
 try{localStorage.setItem('hoops',JSON.stringify(S))}catch(e){}}
 const tm=()=>S.teams.find(t=>t.id===S.tid)||S.teams[0];
-let pendPhoto=null,photoTarget=null,editAv=null,lf='all',subs=false,undoOpen=false,lastTap=null,courtEntry=null,chartP='all',cm=null,pcard=null,profFrom='home',pickOpen=false,pickSel=[],profSortOpen=false;
+let pendPhoto=null,photoTarget=null,editAv=null,lf='all',subs=false,undoOpen=false,lastTap=null,courtEntry=null,chartP='all',cm=null,courtOpenedAt=0,court3=false,ignore3Until=0,pcard=null,profFrom='home',pickOpen=false,pickSel=[],profSortOpen=false;
 const EMO=['🏀','🔥','⭐','👑','🦁','🐯','🐺','🦅','🐻','🦈','🚀','⚡','💪','😎','🎯','🛡️'];
 const COL=['#c0392b','#d35400','#1e8449','#117a8b','#1f5fbf','#6c3fb5','#b03a7a','#34495e'];
 function avPanel(p){return `<div class="avp"><div class="emo">${EMO.map(e=>`<button data-emo="${e}" class="${p.emoji===e&&!p.photo?'sel':''}">${e}</button>`).join('')}</div><div class="cols">${COL.map(c=>`<button data-col="${c}" style="background:${c}" class="${p.color===c&&!p.photo?'sel':''}" aria-label="Pick color"></button>`).join('')}</div><div class="row"><label class="lbtn" for="cam" data-pt="${p.id}">Take photo</label><label class="lbtn" for="file" data-pt="${p.id}">From gallery</label></div><div class="row"><button data-clr="${p.id}">Reset</button><button class="p" data-done="1">Done</button></div></div>`}
@@ -212,7 +218,7 @@ function teamsUI(){const n=S.note?`<div class="empty" style="margin-bottom:8px">
  <div style="color:var(--mut);font-size:13px;margin:6px 2px 0">Tap a team to load its saved roster.</div>
  <div class="row"><input id="tn" maxlength="24" placeholder="New team name"><button class="p" id="addteam">Add team</button></div>
  <div class="row"><button class="d" id="delteam">Delete ${esc(tm().name)}</button></div>
- <h1>Opponent</h1><div class="row"><input id="opn" maxlength="24" placeholder="Opponent name" value="${S.opp==='Away'?'':esc(S.opp)}"></div>${leagueUI()}`}
+ <h1>Opponent</h1><div class="row"><input id="opn" maxlength="24" placeholder="Opponent name" value="${S.opp==='Away'?'':esc(S.opp)}"></div>${leagueUI()}<h1>Game format</h1><div class="tabs"><button data-fmt="q" class="${S.fmt!=='h'?'on':''}">4 quarters</button><button data-fmt="h" class="${S.fmt==='h'?'on':''}">2 halves</button></div>`}
 function allGames(){const o=S.games.filter(g=>!(S.log.length&&g.id===S.gid)).map(g=>({at:g.at,opp:g.opp,team:g.team,players:g.players,log:g.log}));
  if(S.log.length)o.push({at:Date.now(),cur:true,opp:S.opp,team:tm().name,players:tm().players,log:S.log});return o}
 function statsIn(log,pid){const s={f2m:0,f2x:0,f3m:0,f3x:0,ftm:0,ftx:0,reb:0,ast:0,stl:0,blk:0,tov:0,pf:0,n:0};
@@ -268,9 +274,28 @@ function profUI(){const head=`<div style="display:flex;align-items:center;gap:12
  const sk=S.profSort||'name',skl=(SORTS.find(x=>x[0]===sk)||SORTS[0])[1];
  const sortUI=`<div style="display:flex;justify-content:space-between;align-items:center"><h1>All profiles</h1><button class="sm" id="sortbtn" aria-expanded="${profSortOpen}">Sort: ${skl}</button></div>`+(profSortOpen?`<div class="chips" style="margin-bottom:8px">${SORTS.map(([k,l])=>`<button data-sort="${k}" class="${sk===k?'on':''}">${l}</button>`).join('')}</div>`:'')+`<div style="color:var(--mut);font-size:13px;margin:0 2px 8px">${BB(13,true)} Favorites always stay on top. Tap a circle to edit details and avatar.</div>`;
  return head+form+sortUI+list}
-function hofUI(){const idx=playerIndex();
+const NBA=[['ATL','Atlanta Hawks','#E03A3E','#C1D32F'],['BOS','Boston Celtics','#007A33','#BA9653'],['BKN','Brooklyn Nets','#111111','#FFFFFF'],['CHA','Charlotte Hornets','#1D1160','#00788C'],['CHI','Chicago Bulls','#CE1141','#000000'],['CLE','Cleveland Cavaliers','#860038','#FDBB30'],['DAL','Dallas Mavericks','#00538C','#B8C4CA'],['DEN','Denver Nuggets','#0E2240','#FEC524'],['DET','Detroit Pistons','#C8102E','#1D42BA'],['GSW','Golden State Warriors','#1D428A','#FFC72C'],['HOU','Houston Rockets','#CE1141','#C4CED4'],['IND','Indiana Pacers','#002D62','#FDBB30'],['LAC','LA Clippers','#C8102E','#1D428A'],['LAL','Los Angeles Lakers','#552583','#FDB927'],['MEM','Memphis Grizzlies','#5D76A9','#12173F'],['MIA','Miami Heat','#98002E','#F9A01B'],['MIL','Milwaukee Bucks','#00471B','#EEE1C6'],['MIN','Minnesota Timberwolves','#0C2340','#78BE20'],['NOP','New Orleans Pelicans','#0C2340','#C8102E'],['NYK','New York Knicks','#006BB6','#F58426'],['OKC','Oklahoma City Thunder','#007AC1','#EF3B24'],['ORL','Orlando Magic','#0077C0','#C4CED4'],['PHI','Philadelphia 76ers','#006BB6','#ED174C'],['PHX','Phoenix Suns','#1D1160','#E56020'],['POR','Portland Trail Blazers','#E03A3E','#000000'],['SAC','Sacramento Kings','#5A2D81','#63727A'],['SAS','San Antonio Spurs','#2B2B2B','#C4CED4'],['TOR','Toronto Raptors','#CE1141','#000000'],['UTA','Utah Jazz','#002B5C','#F9A01B'],['WAS','Washington Wizards','#002B5C','#E31837']];
+const THEMES=[['def','Courtside classic','#14213d','#f4b400']].concat(NBA);
+const h2r=h=>{h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))};
+const r2h=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>{const A=h2r(a),B=h2r(b);return r2h(A.map((v,i)=>v*(1-t)+B[i]*t))};
+const lum=h=>{const [r,g,b]=h2r(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b};
+const inkOn=h=>lum(h)>.42?'#14213d':'#ffffff';
+function applyTheme(){const t=THEMES.find(x=>x[0]===S.theme)||THEMES[0],p=t[2],s2=t[3];
+ const lightV=`--acc:${p};--onacc:${inkOn(p)};--gold:${s2};--sel:${mix(p,'#ffffff',.88)}`;
+ const da=lum(p)>=lum(s2)?p:s2,darkV=`--acc:${da};--onacc:${inkOn(da)};--gold:${s2};--sel:${mix(da,'#101a2e',.78)}`;
+ const t2l=lum(s2)<.25?mix(p,'#ffffff',.6):mix(s2,'#ffffff',.2);
+ const card=`--t1d:${mix(p,'#000000',.6)};--t1x:${mix(p,'#000000',.82)};--t2:${s2};--t2d:${mix(s2,'#000000',.4)};--t2l:${t2l};--t2ink:${inkOn(s2)}`;
+ let el=document.getElementById('themecss');if(!el){el=document.createElement('style');el.id='themecss';document.head.appendChild(el)}
+ el.textContent=`:root{${lightV};${card}}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){${darkV}}}:root[data-theme="dark"]{${darkV}}`}
+function settingsUI(){const cur=S.theme||'def';
+ const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Settings</h1></div>`;
+ return head+`<h1>Theme</h1><div style="color:var(--mut);font-size:14px;margin:-4px 2px 10px">Pick a team and the colors change across the whole app.</div><div class="thgrid">${THEMES.map(([k,n,p,s2])=>`<button class="thm ${k===cur?'on':''}" data-th="${k}" aria-pressed="${k===cur}"><span class="sws"><i style="background:${p}"></i><i style="background:${s2}"></i></span><span>${esc(n)}</span></button>`).join('')}</div>`}
+function hofList(){return playerIndex().filter(e=>{const pr=S.profiles.find(x=>'pr:'+x.id===e.key);return pr&&pr.fav})}
+function hofSub(){const n=hofList().length;if(n)return n+' favorite'+(n===1?'':'s')+' · tap to see their cards';return S.profiles.some(x=>x.fav)?'Your favorites show up here once they have stats':'Mark favorites in Player profiles to add them here'}
+function hofUI(){const idx=hofList();
  const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Hall of Fame</h1></div>`;
- if(!idx.length)return head+`<div class="empty" style="margin-top:14px">No cards yet. Log stats for a player and their card shows up here.</div>`;
+ if(!idx.length){const hasFav=S.profiles.some(x=>x.fav);return head+`<div class="empty" style="margin-top:14px">${hasFav?'Your favorites don\'t have any stats yet. Their cards appear here after they play.':'No favorites yet. Only players marked as favorites get a card in the Hall of Fame.'}</div><button class="big" data-go="prof" data-from="home" style="margin-top:12px">Player profiles<small>Tap the basketball icon to mark favorites</small></button>`}
  if(!idx.some(x=>x.key===pcard))pcard=idx[0].key;
  const sel=idx.find(x=>x.key===pcard),no=idx.indexOf(sel)+1;
  const gs=sel.games.slice().sort((a,b)=>b.g.at-a.g.at),n=gs.length;
@@ -305,14 +330,14 @@ function hofUI(){const idx=playerIndex();
 function homeUI(){
  const live=S.log.length>0;
  const recent=S.games.slice(0,3).map(g=>{const [h,a]=swap(g,()=>[home(),away()]);return `<button class="big" data-view="${g.id}">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}<small>${new Date(g.at).toLocaleDateString()}</small></button>`}).join('');
- return `<div class="hero">${BALL}<div class="ht"><div class="num" style="font-size:48px;font-weight:700;line-height:1">Courtside</div><div style="margin-top:4px">Live basketball stats</div></div></div>
+ return `<div class="hero">${BALL}<button class="gear" data-go="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><div class="ht"><div class="num" style="font-size:48px;font-weight:700;line-height:1">Courtside</div><div style="margin-top:4px">Live basketball stats</div></div></div>
  ${live?`<button class="big p" data-go="continue">Continue game<small>${esc(tm().name)} ${home()} - ${away()} ${esc(S.opp)} · ${plab(S.q)}</small></button>`:''}
  <button class="big ${live?'':'p'}" data-go="new">New game<small>${live?'Saves the current game, then starts fresh':'Starts fresh with an empty roster'}</small></button>
  <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button>
  
- <button class="big hof" data-go="hof">Hall of Fame<small>${playerIndex().length?playerIndex().length+' player'+(playerIndex().length===1?'':'s')+' · tap to see their cards':'Player cards appear after you log stats'}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved · pick them for any roster</small></button>${recent?`<h1>Recent games</h1>${recent}`:''}`}
+ <button class="big hof" data-go="hof">Hall of Fame<small>${hofSub()}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved · pick them for any roster</small></button>${recent?`<h1>Recent games</h1>${recent}`:''}`}
 const lgName=id=>(S.leagues.find(l=>l.id===id)||{}).name||'';
-function leagueUI(){return `<h1>League or tournament</h1><div class="row"><select id="lg" aria-label="League or tournament"><option value="">None</option>${S.leagues.map(l=>`<option value="${l.id}"${l.id===S.league?' selected':''}>${esc(l.name)}</option>`).join('')}</select>${S.league?'<button class="d" id="dellg" style="flex:0 0 90px">Delete</button>':''}</div><div class="row"><input id="ln" maxlength="30" placeholder="New league or tournament"><button class="p" id="addleague">Add</button></div>`}
+function leagueUI(){return `<h1>League/Tournament</h1><div class="row"><select id="lg" aria-label="League/Tournament"><option value="">None</option>${S.leagues.map(l=>`<option value="${l.id}"${l.id===S.league?' selected':''}>${esc(l.name)}</option>`).join('')}</select>${S.league?'<button class="d" id="dellg" style="flex:0 0 90px">Delete</button>':''}</div><div class="row"><input id="ln" maxlength="30" placeholder="New league or tournament"><button class="p" id="addleague">Add</button></div>`}
 function games(){
  if(S.view){const g=S.games.find(x=>x.id===S.view);if(g){const ln=lgName(g.league);return `<div class="row"><button data-back="1">Back</button></div><h1>${esc(g.team)} vs ${esc(g.opp)}</h1>${ln?`<div style="color:var(--mut);margin:-4px 0 8px">${esc(ln)}</div>`:''}`+swap(g,box)}}
  if(!S.games.length)return `<div class="empty">No saved games yet. Tap Save game in the Game tab.</div>`;
@@ -346,10 +371,10 @@ const SHOTS=['f2m','f2x','f3m','f3x'];
 const LINES='<g fill="none" stroke="var(--mut)" stroke-width="3"><rect x="2" y="2" width="496" height="466"/><rect x="170" y="280" width="160" height="188"/><path d="M190,280 A60,60 0 0 1 310,280"/><path d="M190,280 A60,60 0 0 0 310,280" stroke-dasharray="6 6"/><path d="M30,468 L30,328 A237.5,237.5 0 0 1 470,328 L470,468"/><path d="M210,417.5 A40,40 0 0 1 290,417.5"/><path d="M190,2 A60,60 0 0 0 310,2"/><line x1="220" y1="430" x2="280" y2="430"/></g><circle cx="250" cy="417.5" r="8" fill="none" stroke="#e8590c" stroke-width="3"/>';
 const courtSvg=(id,inner)=>`<svg id="${id}" viewBox="0 0 500 470" style="width:100%;display:block;touch-action:manipulation;border-radius:10px;background:var(--sel)" role="img" aria-label="Half court">${LINES}${inner||''}</svg>`;
 const dot=e=>e.t.endsWith('m')?`<circle cx="${e.x}" cy="${e.y}" r="9" fill="var(--good)" stroke="#fff" stroke-width="2"/>`:`<g stroke="var(--bad)" stroke-width="4" stroke-linecap="round"><line x1="${e.x-7}" y1="${e.y-7}" x2="${e.x+7}" y2="${e.y+7}"/><line x1="${e.x-7}" y1="${e.y+7}" x2="${e.x+7}" y2="${e.y-7}"/></g>`;
-function openCourt(e){courtEntry=e;const p=tm().players.find(x=>x.id===e.p);
+function openCourt(e){courtEntry=e;courtOpenedAt=Date.now();court3=(e.t==='f3m'||e.t==='f3x');const p=tm().players.find(x=>x.id===e.p);
  document.getElementById('court').innerHTML=`<div class="card"><div style="font-weight:600;margin-bottom:8px">${p?esc(p.name)+': ':''}${LBL[e.t]}. Tap where the shot was taken.</div>${courtSvg('cs',e.x!==undefined?dot(e):'')}<div class="row"><button id="courtskip">Skip</button></div></div>`;
  document.getElementById('court').classList.add('on')}
-function closeCourt(){courtEntry=null;cm=null;document.getElementById('court').classList.remove('on')}
+function closeCourt(){if(court3){ignore3Until=Date.now()+600;court3=false}courtEntry=null;cm=null;document.getElementById('court').classList.remove('on')}
 function shotChart(){const all=S.log.filter(e=>e.x!==undefined&&SHOTS.includes(e.t));
  if(chartP!=='all'&&!tm().players.some(p=>p.id===chartP))chartP='all';
  if(!all.length&&chartP==='all')return '';
@@ -366,8 +391,8 @@ function undoAway(){let i=-1;for(let k=S.log.length-1;k>=0;k--){if(S.log[k].p===
  if(i<0){toast('No away points to undo');return}
  const e=S.log.splice(i,1)[0];S.lastMsg='Undid '+LBL[e.t];save();draw();toast(S.lastMsg)}
 function draw(){
- const onHome=S.screen==='home'||S.screen==='hof'||S.screen==='prof';document.querySelector('.board').style.display=onHome?'none':'';document.getElementById('tabs').style.display=onHome?'none':'';
- if(onHome){document.getElementById('main').innerHTML=S.screen==='hof'?hofUI():S.screen==='prof'?profUI():homeUI();return}
+ const onHome=S.screen==='home'||S.screen==='hof'||S.screen==='prof'||S.screen==='settings';document.querySelector('.board').style.display=onHome?'none':'';document.getElementById('tabs').style.display=onHome?'none':'';
+ if(onHome){document.getElementById('main').innerHTML=S.screen==='hof'?hofUI():S.screen==='prof'?profUI():S.screen==='settings'?settingsUI():homeUI();return}
  document.getElementById('hs').textContent=home();
  document.getElementById('as').textContent=away();
  document.getElementById('hn').textContent=tm().name;document.getElementById('an').textContent=S.opp;
@@ -404,18 +429,18 @@ function roster(){
  return `<h1>Team</h1>${teamsUI()}<h1>Add a player</h1><div class="row"><input class="n" id="pn" inputmode="numeric" maxlength="3" placeholder="#"><input id="pm" maxlength="20" placeholder="Name"><button class="p" id="addp">Add</button></div><div id="psug" class="sugbox" hidden></div>
  <div class="row"><label class="lbtn" for="cam" data-pt="new">Take photo</label><label class="lbtn" id="pickphoto" for="file" data-pt="new">${pendPhoto?'Photo added':'From gallery'}</label></div>
  ${profPickUI()}<h1>Roster</h1>${tm().players.length?'<div style="color:var(--mut);font-size:14px;margin:-4px 0 8px">Tap a circle to set an avatar or photo.</div>':''}`+(tm().players.length?tm().players.map(p=>`<div class="rl"><button class="avb" data-edav="${p.id}" aria-label="Edit avatar for ${esc(p.name)}">${av(p,44)}</button><span><b class="num" style="font-size:20px">#${esc(p.num)}</b> ${esc(p.name)}</span><button data-rm="${p.id}">Remove</button></div>${editAv===p.id?numEdit(p)+avPanel(p):''}`).join(''):`<div class="empty">No players yet. Enter a number and name above.</div>`)
- +`<div class="row" style="margin-top:14px"><button class="p" id="savegame2">Save game</button></div><div style="color:var(--mut);font-size:13px;margin:6px 2px">Saves the roster, opponent, league, format and any stats.</div>`+reuseUI()+`<h1>Game format</h1><div class="tabs"><button data-fmt="q" class="${S.fmt!=='h'?'on':''}">4 quarters</button><button data-fmt="h" class="${S.fmt==='h'?'on':''}">2 halves</button></div>`}
+ +`<div class="row" style="margin-top:14px"><button class="p" id="savegame2">Save game</button></div><div style="color:var(--mut);font-size:13px;margin:6px 2px">Saves the roster, opponent, league, format and any stats.</div>`+reuseUI()}
 document.addEventListener('click',e=>{if(!(e.target.closest&&(e.target.closest('#psug')||e.target.id==='pm'))){const sb=document.getElementById('psug');if(sb)sb.hidden=true}
  const tc=e.target.closest&&e.target.closest('.tcard');if(tc){tc.classList.toggle('flip');return}
  const sv=e.target.closest&&e.target.closest('#cs');
- if(sv&&courtEntry){const r=sv.getBoundingClientRect();courtEntry.x=Math.max(0,Math.min(500,Math.round((e.clientX-r.left)/r.width*500)));courtEntry.y=Math.max(0,Math.min(470,Math.round((e.clientY-r.top)/r.height*470)));save();sv.insertAdjacentHTML('beforeend',dot(courtEntry));toast('Shot location saved');setTimeout(closeCourt,300);return}
+ if(sv&&courtEntry){const en=courtEntry,three=en.t==='f3m'||en.t==='f3x';if(three&&Date.now()-courtOpenedAt<350)return;const r=sv.getBoundingClientRect();en.x=Math.max(0,Math.min(500,Math.round((e.clientX-r.left)/r.width*500)));en.y=Math.max(0,Math.min(470,Math.round((e.clientY-r.top)/r.height*470)));if(three)courtEntry=null;save();sv.insertAdjacentHTML('beforeend',dot(en));toast('Shot location saved');setTimeout(closeCourt,300);return}
  const s2=e.target.closest&&e.target.closest('#cs2');
  if(s2&&cm){const pl=tm().players.find(x=>x.id===cm.p);if(!pl){toast('Pick a player first');return}
   const r=s2.getBoundingClientRect(),x=Math.max(0,Math.min(500,Math.round((e.clientX-r.left)/r.width*500))),y=Math.max(0,Math.min(470,Math.round((e.clientY-r.top)/r.height*470)));
   const is3=y>=328?(x<30||x>470):Math.hypot(x-250,y-417.5)>237.5;
   add((is3?'f3':'f2')+cm.r,pl.id);const en=S.log[S.log.length-1];en.x=x;en.y=y;cm.added.push(en);save();renderChartModal();
   toast((is3?'3PT ':'2PT ')+(cm.r==='m'?'made':'missed')+' added for '+pl.name);return}
- if(e.target.id==='court')closeCourt()},true);
+ if(e.target.id==='court'&&!(court3&&Date.now()-courtOpenedAt<350))closeCourt()},true);
 document.addEventListener('click',e=>{const l=e.target.closest&&e.target.closest('label[data-pt]');if(l)photoTarget=l.dataset.pt},true);
 document.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;const d=b.dataset;
@@ -433,6 +458,8 @@ document.addEventListener('click',e=>{
  else if(d.clr){const p=findP(d.clr);if(p){p.photo='';p.emoji='';p.color='';linkSync(p)}save();draw()}
  else if(b.id==='gohome'){S.screen='home';draw()}
  else if(d.sg){const pr=S.profiles.find(x=>x.id===d.sg);if(pr){document.getElementById('pm').value=pr.name;document.getElementById('pn').value=pr.num==='-'?'':pr.num;const sb=document.getElementById('psug');if(sb)sb.hidden=true;toast('Selected '+pr.name+'. Change the number if needed, then tap Add.')}}
+ else if(d.go==='settings'){S.screen='settings';draw();window.scrollTo(0,0)}
+ else if(d.th){S.theme=d.th;applyTheme();save();draw();const t=THEMES.find(x=>x[0]===d.th);toast((t?t[1]:'Theme')+' theme applied')}
  else if(d.go==='prof'){profFrom=d.from||'home';S.screen='prof';editAv=null;draw();window.scrollTo(0,0)}
  else if(b.id==='pback'){editAv=null;if(profFrom==='roster'){S.screen='app';S.tab='roster'}else S.screen='home';draw();window.scrollTo(0,0)}
  else if(b.id==='pickprof'){pickOpen=!pickOpen;pickSel=[];draw()}
@@ -485,8 +512,8 @@ document.addEventListener('click',e=>{
  else if(d.res&&cm){cm.r=d.res;renderChartModal()}
  else if(b.id==='csundo'&&cm){const en=cm.added.pop();if(!en){toast('Nothing to undo here');return}const i=S.log.indexOf(en);if(i>=0)S.log.splice(i,1);save();draw();renderChartModal();toast('Removed last shot')}
  else if(d.cp){chartP=d.cp;draw();const el=document.getElementById('chartsec');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
- else if(d.st){const now=Date.now();
-  if(!d.away&&SHOTS.includes(d.st)&&lastTap&&lastTap.t===d.st&&lastTap.p===S.sel&&now-lastTap.at<400&&S.log.includes(lastTap.e)){openCourt(lastTap.e);lastTap=null;return}
+ else if(d.st){const now=Date.now(),three=d.st==='f3m'||d.st==='f3x';if(three&&now<ignore3Until)return;
+  if(!d.away&&SHOTS.includes(d.st)&&lastTap&&lastTap.t===d.st&&lastTap.p===S.sel&&now-lastTap.at<(three?550:400)&&S.log.includes(lastTap.e)){openCourt(lastTap.e);lastTap=null;return}
   add(d.st,d.away?'away':S.sel);if(!d.away&&SHOTS.includes(d.st))lastTap={t:d.st,p:S.sel,at:now,e:S.log[S.log.length-1]}}
  else if(b.id==='undo')undo();
  else if(b.id==='undoaway')undoAway();
@@ -516,6 +543,6 @@ function showSug(){const box=document.getElementById('psug'),inp=document.getEle
 document.addEventListener('focusin',e=>{if(e.target.id==='pm')showSug()});
 document.addEventListener('input',e=>{if(e.target.id==='pm')showSug()});
 if(tm().players.length&&S.tab==='roster')S.tab='game';
-draw();
+applyTheme();draw();
 </script>
 </body></html>
