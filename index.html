@@ -192,6 +192,8 @@ label.avb{display:inline-block;cursor:pointer}
 .mtp{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:6px 8px;font-weight:600;font-size:14px;min-width:0}
 .mtp span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mtcard .tile{background:var(--bg)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.duo .big{margin-top:0;font-size:21px;padding:14px 14px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:12px}
 .modal.on{display:flex}
 .modal .card{background:var(--card);border-radius:16px;padding:12px;width:100%;max-width:420px}
@@ -380,13 +382,13 @@ function finUI(){const back=(id,t)=>`<div style="display:flex;align-items:center
   ${lab('League/Tournament')}<select class="fld" id="fe-l" aria-label="League/Tournament">${opts}</select><input class="fld" id="fe-n" style="margin-top:6px" maxlength="30" placeholder="Or type a new league/tournament name" aria-label="New league or tournament name">
   <div class="row"><button class="p" data-fsave="${g.id}">Save</button>${ed?`<button data-freset="${g.id}">Use tracked score (${th}-${ta})</button>`:''}<button data-fcancel="1">Cancel</button></div></div>`};
  if(S.fview){const g=S.finished.find(x=>x.id===S.fview);if(g){const ln=lgName(g.league),[h,a,ed,th,ta]=finScore(g);
-  return back('id="finback"','Back')+`<h1>${esc(g.team)} ${h} - ${a} ${esc(g.opp)} <i class="fbadge">FINAL</i></h1><div style="color:var(--mut);margin:-4px 0 8px">${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''} · locked, only the score, opponent and league can be edited${ed?' · score edited (tracked players total '+th+'-'+ta+')':''}</div><div class="row" style="margin:0 0 8px"><button data-fedit="${g.id}">Edit score and details</button></div>${finEdit===g.id?panel(g):''}<div style="color:var(--mut);font-size:13px;margin:6px 2px">The player stats below are only for the players you tracked.</div>`+swap(g,box)}}
+  return back('id="finback"','Back')+`<h1>${esc(g.team)} ${h} - ${a} ${esc(g.opp)} <i class="fbadge">FINAL</i></h1><div style="color:var(--mut);margin:-4px 0 8px">${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''} · locked, only the score, opponent and league can be edited${ed?' · score edited (tracked players total '+th+'-'+ta+')':''}</div><div class="row" style="margin:0 0 8px"><button data-fedit="${g.id}">Edit score and details</button><button data-fshare="${g.id}">Share box score</button></div>${finEdit===g.id?panel(g):''}<div style="color:var(--mut);font-size:13px;margin:6px 2px">The player stats below are only for the players you tracked.</div>`+swap(g,box)}}
  if(!S.finished.length)return back('data-home="1"','Home')+`<div class="empty" style="margin-top:14px">No finished games yet. Tap End game in the Game tab when a game is over. Finished games are locked, except the final score, opponent and league, which you can edit.</div>`;
  const chips=[['all','All']].concat(S.leagues.map(l=>[l.id,l.name]),[['none','No league']]);
  if(!chips.some(c=>c[0]===flf))flf='all';
  const list=S.finished.filter(g=>flf==='all'||(flf==='none'?!lgName(g.league):g.league===flf));let w=0,l=0;
  const cards=list.map(g=>{const [h,a,ed,th,ta]=finScore(g);if(h>a)w++;else if(a>h)l++;const ln=lgName(g.league);
-  return `<div class="line" style="display:block"><b class="num" style="font-size:20px">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}</b> <i class="fbadge">FINAL</i><br><span>${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''}${ed?' · score edited':''}</span><div class="row"><button data-fview="${g.id}">View</button><button data-fedit="${g.id}">Edit details</button></div>${finEdit===g.id?panel(g):''}</div>`}).join('');
+  return `<div class="line" style="display:block"><b class="num" style="font-size:20px">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}</b> <i class="fbadge">FINAL</i><br><span>${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''}${ed?' · score edited':''}</span><div class="row"><button data-fview="${g.id}">View</button><button data-fedit="${g.id}">Edit details</button><button data-fshare="${g.id}">Share</button></div>${finEdit===g.id?panel(g):''}</div>`}).join('');
  return back('data-home="1"','Home')+`<div style="color:var(--mut);font-size:14px;margin:8px 2px 4px">Final games are locked. You can view them and edit the final score, opponent and league.</div><div class="chips" style="margin:8px 0">${chips.map(c=>`<button data-flf="${c[0]}" class="${flf===c[0]?'on':''}">${esc(c[1])}</button>`).join('')}</div>${list.length?`<div style="color:var(--mut);margin:6px 2px 8px">Record: ${w}-${l} · ${list.length} game${list.length===1?'':'s'}</div>`:''}`+(cards||'<div class="empty">No finished games in this group.</div>')}
 function myTeamsUI(){
  const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">My Teams</h1></div><div style="color:var(--mut);font-size:14px;margin:8px 2px 12px">Every team you've created, with its record from finished games and its roster.</div>`;
@@ -402,6 +404,44 @@ function myTeamsUI(){
    <div class="ph">Roster · ${ros.length} player${ros.length===1?'':'s'}</div>${rost}
    ${cur?'':`<div class="row"><button class="p" data-useteam="${t.id}">Use for next game</button></div>`}</div>`}).join('');
  return head+cards}
+function boxRows(g){const rows=(g.players||[]).map(p=>({p,s:statsIn(g.log,p.id)})),tot={};['pts','fgm','fga','tpm','tpa','ftm','fta','reb','ast','stl','blk','tov','pf'].forEach(k=>tot[k]=rows.reduce((a,x)=>a+x.s[k],0));return {rows,tot}}
+function boxText(g){const [h,a,ed]=finScore(g),ln=lgName(g.league),{rows,tot}=boxRows(g);
+ const line=(n,s)=>`${n}: ${s.pts} PTS, ${s.fgm}/${s.fga} FG, ${s.tpm}/${s.tpa} 3P, ${s.ftm}/${s.fta} FT, ${s.reb} REB, ${s.ast} AST, ${s.stl} STL, ${s.blk} BLK, ${s.tov} TO, ${s.pf} PF`;
+ const L=[`${g.team} ${h} - ${a} ${g.opp} (FINAL)`,new Date(g.at).toLocaleDateString()+(ln?' · '+ln:''),''];
+ rows.forEach(x=>L.push(line('#'+x.p.num+' '+x.p.name,x.s)));L.push('',line('Team totals',tot));
+ if(ed)L.push('','Final score edited. Player stats are for tracked players only.');L.push('','Courtside Stat Tracker');return L.join('\n')}
+function boxImage(g){return new Promise((res,rej)=>{try{
+ const [h,a,ed]=finScore(g),ln=lgName(g.league),{rows,tot}=boxRows(g),cs=getComputedStyle(document.documentElement);
+ const acc=cs.getPropertyValue('--acc').trim()||'#14213d',onacc=cs.getPropertyValue('--onacc').trim()||'#ffffff';
+ const W=1200,P=40,RH=64,top=285,H=top+RH*(rows.length+2)+(ed?70:20)+80,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ const F='Barlow, system-ui, -apple-system, Segoe UI, sans-serif',FC='"Barlow Condensed","Arial Narrow",Impact,sans-serif';
+ const t=(txt,px,py,font,col,al)=>{x.font=font;x.fillStyle=col;x.textAlign=al||'left';x.textBaseline='middle';x.fillText(String(txt),px,py)};
+ x.fillStyle='#ffffff';x.fillRect(0,0,W,H);
+ x.fillStyle=acc;x.fillRect(0,0,W,190);
+ t(g.team,P,70,'700 56px '+FC,onacc);t(g.opp,W-P,70,'700 56px '+FC,onacc,'right');
+ t(h,W/2-90,100,'700 120px '+FC,onacc,'center');t(a,W/2+90,100,'700 120px '+FC,onacc,'center');t('-',W/2,100,'700 90px '+FC,onacc,'center');
+ t('FINAL'+(ln?'  ·  '+ln:'')+'  ·  '+new Date(g.at).toLocaleDateString(),W/2,165,'600 26px '+F,onacc,'center');
+ t('BOX SCORE',P,222,'700 34px '+FC,'#14213d');
+ const cols=[['',290,'left'],['PTS',90],['FG',105],['3P',105],['FT',105],['REB',80],['AST',80],['STL',80],['BLK',80],['TO',55],['PF',50]];
+ let cx=P;const xs=cols.map(cl=>{const o=cx;cx+=cl[1];return o});
+ x.fillStyle='#14213d';x.fillRect(P,top-RH/2+10,W-2*P,RH);
+ cols.forEach((cl,i)=>t(cl[0],cl[2]==='left'?xs[i]+16:xs[i]+cl[1]-12,top+10,'700 26px '+F,'#ffffff',cl[2]==='left'?'left':'right'));
+ const row=(label,s,y,bold,bg)=>{if(bg){x.fillStyle=bg;x.fillRect(P,y-RH/2,W-2*P,RH)}
+  const vals=[s.pts,s.fgm+'-'+s.fga,s.tpm+'-'+s.tpa,s.ftm+'-'+s.fta,s.reb,s.ast,s.stl,s.blk,s.tov,s.pf],f=(bold?'700 ':'600 ')+'28px '+F;
+  t(label,xs[0]+16,y,f,'#14213d');vals.forEach((v,i)=>t(v,xs[i+1]+cols[i+1][1]-12,y,f,'#14213d','right'))};
+ rows.forEach((r2,i)=>row('#'+r2.p.num+' '+r2.p.name,r2.s,top+10+RH*(i+1),false,i%2?'#f1f4f9':'#ffffff'));
+ const ty=top+10+RH*(rows.length+1);x.fillStyle='#14213d';x.fillRect(P,ty-RH/2,W-2*P,3);row('Team totals',tot,ty,true,'#e3e9f3');
+ if(ed)t('Final score edited. Player stats are for tracked players only.',P,ty+RH/2+30,'600 24px '+F,'#66738a');
+ t('Courtside Stat Tracker',W-P,H-36,'600 24px '+F,'#66738a','right');
+ c.toBlob(b=>b?res(b):rej(new Error('no image')),'image/png')}catch(e){rej(e)}})}
+function showBoxText(text){const m=document.getElementById('pstat');m.innerHTML=`<div class="card pc"><div style="font:700 22px Barlow,sans-serif">Box score text</div><div style="color:var(--mut);font-size:14px;margin:2px 0 8px">Sharing isn't available here. Select the text below, copy it, and paste it anywhere.</div><textarea readonly style="width:100%;height:260px;border-radius:10px;border:1px solid var(--line);padding:10px;font:13px/1.35 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--ink)">${esc(text)}</textarea><div class="row"><button class="p" id="pstatclose">Close</button></div></div>`;m.classList.add('on');const ta=m.querySelector('textarea');ta.focus();ta.select()}
+async function shareBox(g){const text=boxText(g),title=g.team+' vs '+g.opp+' box score';
+ try{const blob=await boxImage(g),file=new File([blob],'box-score.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title,text});return 'shared'}}
+ catch(e){if(e&&e.name==='AbortError')return 'cancelled'}
+ try{if(navigator.share){await navigator.share({title,text});return 'shared'}}catch(e){if(e&&e.name==='AbortError')return 'cancelled'}
+ try{await navigator.clipboard.writeText(text);return 'copied'}catch(e){}
+ showBoxText(text);return 'shown'}
 function hofUI(){const idx=hofList();
  const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Hall of Fame</h1></div>`;
  if(!idx.length){const hasFav=S.profiles.some(x=>x.fav);return head+`<div class="empty" style="margin-top:14px">${hasFav?'Your favorites don\'t have any stats yet. Their cards appear here after they play.':'No favorites yet. Only players marked as favorites get a card in the Hall of Fame.'}</div><button class="big" data-go="prof" data-from="home" style="margin-top:12px">Player profiles<small>Tap the basketball icon to mark favorites</small></button>`}
@@ -442,9 +482,9 @@ function homeUI(){
  return `<div class="hero">${BALL}<button class="gear" data-go="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><div class="ht"><div class="num" style="font-size:48px;font-weight:700;line-height:1">Courtside</div><div style="margin-top:4px">Live basketball stats</div></div></div>
  ${live?`<button class="big p" data-go="continue">Continue game<small>${esc(tm().name)} ${home()} - ${away()} ${esc(S.opp)} · ${plab(S.q)}</small></button>`:''}
  <button class="big ${live?'':'p'}" data-go="new">New game<small>${live?'Saves the current game, then starts fresh':'Starts fresh with an empty roster'}</small></button>
- <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button><button class="big" data-go="fin">Finished games<small>${S.finished.length} final · locked, view only</small></button><button class="big" data-go="teams">My Teams<small>${S.teams.length} team${S.teams.length===1?'':'s'} · records and rosters</small></button>
+ <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button><button class="big" data-go="fin">Finished games<small>${S.finished.length} final · locked, view only</small></button><button class="big hof" data-go="hof">Hall of Fame<small>${hofSub()}</small></button>
  
- <button class="big hof" data-go="hof">Hall of Fame<small>${hofSub()}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved · pick them for any roster</small></button>${recent?`<h1>Recent games</h1>${recent}`:''}`}
+ <div class="duo"><button class="big" data-go="teams">My Teams<small>${S.teams.length} team${S.teams.length===1?'':'s'}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved</small></button></div>${recent?`<h1>Recent games</h1>${recent}`:''}`}
 const lgName=id=>(S.leagues.find(l=>l.id===id)||{}).name||'';
 function leagueUI(){return `<h1>League/Tournament</h1><div class="row"><select id="lg" aria-label="League/Tournament"><option value="">None</option>${S.leagues.map(l=>`<option value="${l.id}"${l.id===S.league?' selected':''}>${esc(l.name)}</option>`).join('')}</select>${S.league?'<button class="d" id="dellg" style="flex:0 0 90px">Delete</button>':''}</div><div class="row"><input id="ln" maxlength="30" placeholder="New league or tournament"><button class="p" id="addleague">Add</button></div>`}
 function games(){
@@ -586,6 +626,7 @@ document.addEventListener('click',e=>{
   if(nl){let l=S.leagues.find(x=>x.name.trim().toLowerCase()===nl.toLowerCase());if(!l){l={id:'l'+Date.now(),name:nl};S.leagues.push(l)}g.league=l.id}else g.league=document.getElementById('fe-l').value;
   finEdit=null;save();draw();toast('Game updated')}
  else if(d.freset){const g=S.finished.find(x=>x.id===d.freset);if(g){delete g.fh;delete g.fa}finEdit=null;save();draw();toast('Using the tracked score again')}
+ else if(d.fshare){const g=S.finished.find(x=>x.id===d.fshare);if(!g)return;toast('Preparing the box score...');shareBox(g).then(r=>{if(r==='copied')toast('Box score copied. Paste it anywhere to share.')})}
  else if(d.fview){S.fview=d.fview;draw();window.scrollTo(0,0)}
  else if(b.id==='finback'){S.fview=null;draw()}
  else if(d.flf){flf=d.flf;draw()}
