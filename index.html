@@ -182,6 +182,16 @@ label.avb{display:inline-block;cursor:pointer}
 .gl2{color:var(--mut);font-size:12px;margin-top:3px}
 .fbadge{font-style:normal;display:inline-block;background:var(--acc);color:var(--onacc);border-radius:8px;padding:2px 8px;font:700 12px Barlow,sans-serif;letter-spacing:.1em;vertical-align:middle}
 .line .fbadge{color:var(--onacc);font-size:12px}
+.fld{width:100%;border-radius:10px;border:1px solid var(--line);padding:11px;font:600 15px Barlow,sans-serif;background:var(--card);color:var(--ink);min-width:0}
+.mtcard{background:var(--card);border-radius:16px;padding:14px;margin-bottom:14px}
+.mth{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mtrec{text-align:center;background:var(--acc);color:var(--onacc);border-radius:12px;padding:6px 14px;flex:none}
+.mtrec b{display:block;font:700 28px/1 "Barlow Condensed","Arial Narrow",sans-serif}
+.mtrec span{font:600 10px Barlow,sans-serif;letter-spacing:.14em}
+.mtgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.mtp{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:6px 8px;font-weight:600;font-size:14px;min-width:0}
+.mtp span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtcard .tile{background:var(--bg)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:12px}
 .modal.on{display:flex}
 .modal .card{background:var(--card);border-radius:16px;padding:12px;width:100%;max-width:420px}
@@ -228,9 +238,29 @@ function reuseUI(){const o=[];const sv=tm().saved||[];if(!tm().players.length&&s
  if(!o.length)return '';
  return `<h1>Saved rosters and previous games</h1>`+o.map(x=>`<button class="big" data-reuse="${x.k}">${esc(x.t)}<small>${x.n} players${x.d?' · '+x.d:''}</small></button>`).join('')}
 function saveGame(force){if(!S.log.length&&!force)return false;const g={id:S.gid||'g'+Date.now(),at:Date.now(),tid:S.tid,team:tm().name,opp:S.opp,league:S.league,court:S.court.slice(),fmt:S.fmt,q:S.q,players:JSON.parse(JSON.stringify(tm().players)),log:JSON.parse(JSON.stringify(S.log))};S.gid=g.id;const i=S.games.findIndex(x=>x.id===g.id);if(i<0)S.games.unshift(g);else S.games[i]=g;return true}
+function dedupeSnap(o){const ps=o.players||[];if(ps.length<2)return false;const cnt={};(o.log||[]).forEach(e=>{cnt[e.p]=(cnt[e.p]||0)+1});
+ const nm=x=>(x.name||'').trim().toLowerCase(),same=(a,b)=>(a.pid&&b.pid&&a.pid===b.pid)||(nm(a)===nm(b)&&String(a.num)===String(b.num));
+ const out=[],map={},fill=(to,from)=>['photo','emoji','color','pos'].forEach(k=>{if(!to[k]&&from[k])to[k]=from[k]});
+ ps.forEach(p=>{const i=out.findIndex(q=>same(p,q));if(i<0){out.push(p);return}
+  const q=out[i];if((cnt[p.id]||0)>(cnt[q.id]||0)){fill(p,q);map[q.id]=p.id;out[i]=p}else{fill(q,p);map[p.id]=q.id}});
+ if(out.length===ps.length)return false;
+ const res=id=>{let k=0;while(map[id]&&map[id]!==id&&k++<20)id=map[id];return id};
+ o.players=out;(o.log||[]).forEach(e=>{e.p=res(e.p)});if(o.court)o.court=[...new Set(o.court.map(res))];return true}
+function pruneFinished(g){const ps=g.players||[],cnt={};(g.log||[]).forEach(e=>{cnt[e.p]=(cnt[e.p]||0)+1});
+ const nm=x=>(x.name||'').trim().toLowerCase(),same=(a,b)=>(a.pid&&b.pid&&a.pid===b.pid)||nm(a)===nm(b);
+ const keep=ps.filter((p,i)=>{if(cnt[p.id])return true;return !ps.some((q,j)=>j!==i&&same(p,q)&&(cnt[q.id]||j<i))});
+ if(keep.length===ps.length)return false;g.players=keep;if(g.court)g.court=g.court.filter(id=>keep.some(p=>p.id===id));return true}
+function cleanData(){let n=0;
+ S.finished.concat(S.games).forEach(g=>{if(dedupeSnap(g))n++});
+ S.finished.forEach(g=>{if(pruneFinished(g))n++});
+ S.teams.forEach(t=>{
+  if(t.id===S.tid){const o={players:t.players,log:S.log,court:S.court};if(dedupeSnap(o)){t.players=o.players;S.court=o.court;n++}}
+  else{const o={players:t.players,log:[]};if(dedupeSnap(o)){t.players=o.players;n++}}
+  if(t.saved){const o={players:t.saved,log:[]};if(dedupeSnap(o)){t.saved=o.players;n++}}});
+ if(S.sel&&!tm().players.some(p=>p.id===S.sel))S.sel=null;return n}
 function resume(id){const g=S.games.find(x=>x.id===id);if(!g)return;saveGame(!!S.gid);let t=S.teams.find(x=>x.id===g.tid);if(!t){t={id:g.tid,name:g.team,players:[]};S.teams.push(t)}
- g.players.forEach(p=>{if(!t.players.some(x=>x.id===p.id))t.players.push(p)});
- S.tid=t.id;S.court=(g.court||[]).filter(id=>t.players.some(p=>p.id===id));subs=false;S.log=JSON.parse(JSON.stringify(g.log));S.q=g.q;S.fmt=g.fmt;S.opp=g.opp;S.league=S.leagues.some(l=>l.id===g.league)?g.league:'';S.gid=g.id;S.view=null;S.tab='game';S.screen='app';S.lastMsg='Resumed saved game.';save();draw();toast(S.lastMsg)}
+ const o={players:t.players.concat(JSON.parse(JSON.stringify(g.players)).filter(p=>!t.players.some(x=>x.id===p.id))),log:JSON.parse(JSON.stringify(g.log)),court:(g.court||[]).slice()};dedupeSnap(o);t.players=o.players;
+ S.tid=t.id;S.court=o.court.filter(id=>t.players.some(p=>p.id===id));subs=false;S.log=o.log;S.q=g.q;S.fmt=g.fmt;S.opp=g.opp;S.league=S.leagues.some(l=>l.id===g.league)?g.league:'';S.gid=g.id;S.view=null;S.tab='game';S.screen='app';S.lastMsg='Resumed saved game.';save();draw();toast(S.lastMsg)}
 function teamsUI(){const n=S.note?`<div class="empty" style="margin-bottom:8px">${esc(S.note)}</div>`:'';S.note='';
  return n+`<div class="players">${S.teams.map(t=>`<button class="pl ${t.id===S.tid?'on':''}" data-team="${t.id}"><span class="num" style="font-size:20px;display:block;overflow:hidden;text-overflow:ellipsis">${esc(t.name)}</span><em>${t.players.length||(t.saved||[]).length} players</em></button>`).join('')}</div>
  <div style="color:var(--mut);font-size:13px;margin:6px 2px 0">Tap a team to load its saved roster.</div>
@@ -338,20 +368,40 @@ function statPopup(id){const pr=S.profiles.find(x=>x.id===id);if(!pr)return;
  document.getElementById('pstat').classList.add('on')}
 function endGame(){if(!S.log.length)return false;const t=tm();
  const g={id:S.gid||'g'+Date.now(),at:Date.now(),tid:S.tid,team:t.name,opp:S.opp,league:S.league,court:S.court.slice(),fmt:S.fmt,q:S.q,players:JSON.parse(JSON.stringify(t.players)),log:JSON.parse(JSON.stringify(S.log)),final:true};
- S.finished.unshift(g);S.games=S.games.filter(x=>x.id!==g.id);
+ dedupeSnap(g);pruneFinished(g);S.finished.unshift(g);S.games=S.games.filter(x=>x.id!==g.id);
  S.log=[];S.q=1;S.gid=null;S.sel=null;S.court=[];subs=false;t.players=[];S.opp='Away';S.league='';S.prevRoster=null;S.lastMsg='';return true}
 function finScore(g){const [h,a]=swap(g,()=>[home(),away()]);const ed=g.fh!=null&&g.fa!=null;return ed?[g.fh,g.fa,true,h,a]:[h,a,false,h,a]}
 function finUI(){const back=(id,t)=>`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" ${id}>${t}</button><h1 style="margin:0;font-size:30px">Finished Games</h1></div>`;
- const panel=g=>{const [h,a,ed,th,ta]=finScore(g);return `<div class="avp"><div style="font-size:13px;color:var(--mut);margin-bottom:8px">Set the final score for the game record. Player stats stay exactly as you tracked them.</div><div class="row" style="margin-top:0"><div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--mut);margin:0 2px 3px">${esc(g.team)}</div><input id="fe-h" style="width:100%" inputmode="numeric" maxlength="3" value="${h}" aria-label="${esc(g.team)} score"></div><div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--mut);margin:0 2px 3px">${esc(g.opp)}</div><input id="fe-a" style="width:100%" inputmode="numeric" maxlength="3" value="${a}" aria-label="${esc(g.opp)} score"></div></div><div class="row"><button class="p" data-fsave="${g.id}">Save score</button>${ed?`<button data-freset="${g.id}">Use tracked (${th}-${ta})</button>`:''}<button data-fcancel="1">Cancel</button></div></div>`};
+ const lab=t=>`<div style="font-size:12px;color:var(--mut);margin:10px 2px 3px">${t}</div>`;
+ const panel=g=>{const [h,a,ed,th,ta]=finScore(g);const opts='<option value="">None</option>'+S.leagues.map(l=>`<option value="${l.id}"${l.id===g.league?' selected':''}>${esc(l.name)}</option>`).join('');
+  return `<div class="avp"><div style="font-size:13px;color:var(--mut);margin-bottom:6px">Edit the final score and game details. Player stats stay exactly as you tracked them.</div>
+  <div class="row" style="margin-top:0"><div style="flex:1;min-width:0">${lab(esc(g.team)+' score').replace('margin:10px 2px 3px','margin:0 2px 3px')}<input class="fld" id="fe-h" inputmode="numeric" maxlength="3" value="${h}" aria-label="${esc(g.team)} score"></div><div style="flex:1;min-width:0">${lab(esc(g.opp)+' score').replace('margin:10px 2px 3px','margin:0 2px 3px')}<input class="fld" id="fe-a" inputmode="numeric" maxlength="3" value="${a}" aria-label="${esc(g.opp)} score"></div></div>
+  ${lab('Opponent')}<input class="fld" id="fe-o" maxlength="24" value="${esc(g.opp)}" aria-label="Opponent name">
+  ${lab('League/Tournament')}<select class="fld" id="fe-l" aria-label="League/Tournament">${opts}</select><input class="fld" id="fe-n" style="margin-top:6px" maxlength="30" placeholder="Or type a new league/tournament name" aria-label="New league or tournament name">
+  <div class="row"><button class="p" data-fsave="${g.id}">Save</button>${ed?`<button data-freset="${g.id}">Use tracked score (${th}-${ta})</button>`:''}<button data-fcancel="1">Cancel</button></div></div>`};
  if(S.fview){const g=S.finished.find(x=>x.id===S.fview);if(g){const ln=lgName(g.league),[h,a,ed,th,ta]=finScore(g);
-  return back('id="finback"','Back')+`<h1>${esc(g.team)} ${h} - ${a} ${esc(g.opp)} <i class="fbadge">FINAL</i></h1><div style="color:var(--mut);margin:-4px 0 8px">${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''} · locked, only the score can be edited${ed?' · score edited (tracked players total '+th+'-'+ta+')':''}</div><div class="row" style="margin:0 0 8px"><button data-fedit="${g.id}">Edit final score</button></div>${finEdit===g.id?panel(g):''}<div style="color:var(--mut);font-size:13px;margin:6px 2px">The player stats below are only for the players you tracked.</div>`+swap(g,box)}}
- if(!S.finished.length)return back('data-home="1"','Home')+`<div class="empty" style="margin-top:14px">No finished games yet. Tap End game in the Game tab when a game is over. Finished games are locked, except the final score, which you can edit.</div>`;
+  return back('id="finback"','Back')+`<h1>${esc(g.team)} ${h} - ${a} ${esc(g.opp)} <i class="fbadge">FINAL</i></h1><div style="color:var(--mut);margin:-4px 0 8px">${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''} · locked, only the score, opponent and league can be edited${ed?' · score edited (tracked players total '+th+'-'+ta+')':''}</div><div class="row" style="margin:0 0 8px"><button data-fedit="${g.id}">Edit score and details</button></div>${finEdit===g.id?panel(g):''}<div style="color:var(--mut);font-size:13px;margin:6px 2px">The player stats below are only for the players you tracked.</div>`+swap(g,box)}}
+ if(!S.finished.length)return back('data-home="1"','Home')+`<div class="empty" style="margin-top:14px">No finished games yet. Tap End game in the Game tab when a game is over. Finished games are locked, except the final score, opponent and league, which you can edit.</div>`;
  const chips=[['all','All']].concat(S.leagues.map(l=>[l.id,l.name]),[['none','No league']]);
  if(!chips.some(c=>c[0]===flf))flf='all';
  const list=S.finished.filter(g=>flf==='all'||(flf==='none'?!lgName(g.league):g.league===flf));let w=0,l=0;
  const cards=list.map(g=>{const [h,a,ed,th,ta]=finScore(g);if(h>a)w++;else if(a>h)l++;const ln=lgName(g.league);
-  return `<div class="line" style="display:block"><b class="num" style="font-size:20px">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}</b> <i class="fbadge">FINAL</i><br><span>${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''}${ed?' · score edited':''}</span><div class="row"><button data-fview="${g.id}">View</button><button data-fedit="${g.id}">Edit score</button></div>${finEdit===g.id?panel(g):''}</div>`}).join('');
- return back('data-home="1"','Home')+`<div style="color:var(--mut);font-size:14px;margin:8px 2px 4px">Final games are locked. You can view them and edit the final score.</div><div class="chips" style="margin:8px 0">${chips.map(c=>`<button data-flf="${c[0]}" class="${flf===c[0]?'on':''}">${esc(c[1])}</button>`).join('')}</div>${list.length?`<div style="color:var(--mut);margin:6px 2px 8px">Record: ${w}-${l} · ${list.length} game${list.length===1?'':'s'}</div>`:''}`+(cards||'<div class="empty">No finished games in this group.</div>')}
+  return `<div class="line" style="display:block"><b class="num" style="font-size:20px">${esc(g.team)} ${h} - ${a} ${esc(g.opp)}</b> <i class="fbadge">FINAL</i><br><span>${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''}${ed?' · score edited':''}</span><div class="row"><button data-fview="${g.id}">View</button><button data-fedit="${g.id}">Edit details</button></div>${finEdit===g.id?panel(g):''}</div>`}).join('');
+ return back('data-home="1"','Home')+`<div style="color:var(--mut);font-size:14px;margin:8px 2px 4px">Final games are locked. You can view them and edit the final score, opponent and league.</div><div class="chips" style="margin:8px 0">${chips.map(c=>`<button data-flf="${c[0]}" class="${flf===c[0]?'on':''}">${esc(c[1])}</button>`).join('')}</div>${list.length?`<div style="color:var(--mut);margin:6px 2px 8px">Record: ${w}-${l} · ${list.length} game${list.length===1?'':'s'}</div>`:''}`+(cards||'<div class="empty">No finished games in this group.</div>')}
+function myTeamsUI(){
+ const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">My Teams</h1></div><div style="color:var(--mut);font-size:14px;margin:8px 2px 12px">Every team you've created, with its record from finished games and its roster.</div>`;
+ const cards=S.teams.map(t=>{
+  const gs=S.finished.filter(g=>g.tid===t.id).sort((a,b)=>b.at-a.at);let w=0,l=0,ti=0,pf=0,pa=0;
+  gs.forEach(g=>{const [h,a]=finScore(g);pf+=h;pa+=a;if(h>a)w++;else if(a>h)l++;else ti++});
+  const n=gs.length,cur=t.id===S.tid,ros=(t.players.length?t.players:(t.saved||[])).slice().sort((a,b)=>(parseInt(a.num,10)||999)-(parseInt(b.num,10)||999));
+  const tile=(v,lb)=>`<div class="tile"><b>${v}</b><span>${lb}</span></div>`;
+  const recent=gs.slice(0,5).map(g=>{const [h,a]=finScore(g),res=h>a?'W':a>h?'L':'T',ln=lgName(g.league);return `<div class="glog"><div class="gl1"><span>vs ${esc(g.opp)}</span><b style="color:${res==='W'?'var(--good)':res==='L'?'var(--bad)':'inherit'}">${res} ${h}-${a}</b></div><div class="gl2">${new Date(g.at).toLocaleDateString()}${ln?' · '+esc(ln):''}</div></div>`}).join('');
+  const rost=ros.length?`<div class="mtgrid">${ros.map(p=>{const pr=S.profiles.find(x=>x.id===p.pid);return `<div class="mtp">${av(p,30)}<span><b class="num">#${esc(p.num)}</b> ${pr&&pr.fav?BB(13,true)+' ':''}${esc(p.name)}${p.pos?' <small style="color:var(--mut)">'+esc(p.pos)+'</small>':''}</span></div>`}).join('')}</div>`:`<div class="empty">No roster saved yet. Add players in the Roster tab.</div>`;
+  return `<div class="mtcard"><div class="mth"><div><b class="num" style="font-size:26px;line-height:1.1">${esc(t.name)}</b>${cur?' <i class="fbadge">CURRENT</i>':''}<div style="color:var(--mut);font-size:14px">${n} finished game${n===1?'':'s'}</div></div><div class="mtrec"><b>${w}-${l}${ti?'-'+ti:''}</b><span>RECORD</span></div></div>
+   ${n?`<div class="tiles" style="margin:10px 0">${tile((pf/n).toFixed(1),'PTS FOR')}${tile((pa/n).toFixed(1),'PTS AGAINST')}${tile((pf-pa>0?'+':'')+((pf-pa)/n).toFixed(1),'AVG MARGIN')}</div><div class="ph">Recent results</div>${recent}`:''}
+   <div class="ph">Roster · ${ros.length} player${ros.length===1?'':'s'}</div>${rost}
+   ${cur?'':`<div class="row"><button class="p" data-useteam="${t.id}">Use for next game</button></div>`}</div>`}).join('');
+ return head+cards}
 function hofUI(){const idx=hofList();
  const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Hall of Fame</h1></div>`;
  if(!idx.length){const hasFav=S.profiles.some(x=>x.fav);return head+`<div class="empty" style="margin-top:14px">${hasFav?'Your favorites don\'t have any stats yet. Their cards appear here after they play.':'No favorites yet. Only players marked as favorites get a card in the Hall of Fame.'}</div><button class="big" data-go="prof" data-from="home" style="margin-top:12px">Player profiles<small>Tap the basketball icon to mark favorites</small></button>`}
@@ -392,7 +442,7 @@ function homeUI(){
  return `<div class="hero">${BALL}<button class="gear" data-go="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><div class="ht"><div class="num" style="font-size:48px;font-weight:700;line-height:1">Courtside</div><div style="margin-top:4px">Live basketball stats</div></div></div>
  ${live?`<button class="big p" data-go="continue">Continue game<small>${esc(tm().name)} ${home()} - ${away()} ${esc(S.opp)} · ${plab(S.q)}</small></button>`:''}
  <button class="big ${live?'':'p'}" data-go="new">New game<small>${live?'Saves the current game, then starts fresh':'Starts fresh with an empty roster'}</small></button>
- <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button><button class="big" data-go="fin">Finished games<small>${S.finished.length} final · locked, view only</small></button>
+ <button class="big" data-go="games">Saved games<small>${S.games.length} saved</small></button><button class="big" data-go="fin">Finished games<small>${S.finished.length} final · locked, view only</small></button><button class="big" data-go="teams">My Teams<small>${S.teams.length} team${S.teams.length===1?'':'s'} · records and rosters</small></button>
  
  <button class="big hof" data-go="hof">Hall of Fame<small>${hofSub()}</small></button><button class="big" data-go="prof" data-from="home">Player profiles<small>${S.profiles.length} saved · pick them for any roster</small></button>${recent?`<h1>Recent games</h1>${recent}`:''}`}
 const lgName=id=>(S.leagues.find(l=>l.id===id)||{}).name||'';
@@ -450,8 +500,8 @@ function undoAway(){let i=-1;for(let k=S.log.length-1;k>=0;k--){if(S.log[k].p===
  if(i<0){toast('No away points to undo');return}
  const e=S.log.splice(i,1)[0];S.lastMsg='Undid '+LBL[e.t];save();draw();toast(S.lastMsg)}
 function draw(){
- const onHome=S.screen==='home'||S.screen==='hof'||S.screen==='prof'||S.screen==='settings'||S.screen==='fin';document.querySelector('.board').style.display=onHome?'none':'';document.getElementById('tabs').style.display=onHome?'none':'';
- if(onHome){document.getElementById('main').innerHTML=S.screen==='hof'?hofUI():S.screen==='prof'?profUI():S.screen==='settings'?settingsUI():S.screen==='fin'?finUI():homeUI();return}
+ const onHome=S.screen==='home'||S.screen==='hof'||S.screen==='prof'||S.screen==='settings'||S.screen==='fin'||S.screen==='teams';document.querySelector('.board').style.display=onHome?'none':'';document.getElementById('tabs').style.display=onHome?'none':'';
+ if(onHome){document.getElementById('main').innerHTML=S.screen==='hof'?hofUI():S.screen==='prof'?profUI():S.screen==='settings'?settingsUI():S.screen==='fin'?finUI():S.screen==='teams'?myTeamsUI():homeUI();return}
  document.getElementById('hs').textContent=home();
  document.getElementById('as').textContent=away();
  document.getElementById('hn').textContent=tm().name;document.getElementById('an').textContent=S.opp;
@@ -520,12 +570,21 @@ document.addEventListener('click',e=>{
  else if(b.id==='endgame'){if(!S.log.length){toast('Log some stats before ending the game');return}
   if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again to end the game. It will be locked.';setTimeout(()=>{if(b.isConnected&&b.dataset.c){delete b.dataset.c;b.textContent='End game'}},4000);return}
   endGame();S.screen='home';save();draw();window.scrollTo(0,0);toast('Game ended. It is now under Finished games.')}
+ else if(d.go==='teams'){S.screen='teams';draw();window.scrollTo(0,0)}
+ else if(d.useteam){if(S.log.length&&d.useteam!==S.tid){toast('End or save the current game before switching teams');return}
+  if(d.useteam!==S.tid){S.tid=d.useteam;S.sel=null;S.court=[];S.gid=null}
+  const t=tm();if(!t.players.length&&(t.saved||[]).length){t.players=t.saved.map((p,i)=>({...p,id:'p'+Date.now()+i}));S.sel=null;S.court=[]}
+  save();draw();toast(t.name+' is now your current team')}
  else if(d.go==='fin'){S.screen='fin';S.fview=null;finEdit=null;draw();window.scrollTo(0,0)}
  else if(d.fedit){finEdit=finEdit===d.fedit?null:d.fedit;draw()}
  else if(d.fcancel){finEdit=null;draw()}
  else if(d.fsave){const g=S.finished.find(x=>x.id===d.fsave);if(!g)return;const h=document.getElementById('fe-h').value.trim(),a=document.getElementById('fe-a').value.trim();
   if(!/^\d{1,3}$/.test(h)||!/^\d{1,3}$/.test(a)){toast('Enter a whole number for each score');return}
-  g.fh=parseInt(h,10);g.fa=parseInt(a,10);finEdit=null;save();draw();toast('Final score updated')}
+  const hv=parseInt(h,10),av2=parseInt(a,10),tr=finScore(g);if(hv===tr[3]&&av2===tr[4]){delete g.fh;delete g.fa}else{g.fh=hv;g.fa=av2}
+  g.opp=((document.getElementById('fe-o').value||'').trim())||'Away';
+  const nl=(document.getElementById('fe-n').value||'').trim();
+  if(nl){let l=S.leagues.find(x=>x.name.trim().toLowerCase()===nl.toLowerCase());if(!l){l={id:'l'+Date.now(),name:nl};S.leagues.push(l)}g.league=l.id}else g.league=document.getElementById('fe-l').value;
+  finEdit=null;save();draw();toast('Game updated')}
  else if(d.freset){const g=S.finished.find(x=>x.id===d.freset);if(g){delete g.fh;delete g.fa}finEdit=null;save();draw();toast('Using the tracked score again')}
  else if(d.fview){S.fview=d.fview;draw();window.scrollTo(0,0)}
  else if(b.id==='finback'){S.fview=null;draw()}
@@ -601,6 +660,7 @@ document.addEventListener('click',e=>{
  else if(b.id==='addp'){const n=document.getElementById('pn').value.trim(),m=document.getElementById('pm').value.trim();
   if(!n&&!m)return;{const nm=m||'Player';let pr=S.profiles.find(x=>x.name.trim().toLowerCase()===nm.trim().toLowerCase());
    if(!pr){pr={id:'pr'+Date.now(),name:nm,num:n||'-',pos:'',photo:pendPhoto||'',emoji:'',color:''};S.profiles.push(pr)}
+   if(tm().players.some(x=>x.pid===pr.id)){toast(nm+' is already on the roster');return}
    tm().players.push({id:'p'+Date.now(),num:n||'-',name:nm,pos:pr.pos||'',photo:pendPhoto||pr.photo||'',emoji:pr.emoji||'',color:pr.color||'',pid:pr.id})}
   pendPhoto=null;save();draw();const i=document.getElementById('pn');if(i)i.focus()}
  else if(d.rm){tm().players=tm().players.filter(p=>p.id!==d.rm);S.log=S.log.filter(x=>x.p!==d.rm);if(S.sel===d.rm)S.sel=null;S.court=S.court.filter(x=>x!==d.rm);if(!tm().players.length)tm().saved=[];save();draw()}
@@ -620,6 +680,6 @@ function showSug(){const box=document.getElementById('psug'),inp=document.getEle
 document.addEventListener('focusin',e=>{if(e.target.id==='pm')showSug()});
 document.addEventListener('input',e=>{if(e.target.id==='pm')showSug()});
 if(tm().players.length&&S.tab==='roster')S.tab='game';
-applyTheme();draw();
+if(cleanData())save();applyTheme();draw();
 </script>
 </body></html>
