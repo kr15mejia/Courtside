@@ -194,6 +194,36 @@ label.avb{display:inline-block;cursor:pointer}
 .mtcard .tile{background:var(--bg)}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .duo .big{margin-top:0;font-size:21px;padding:14px 14px}
+.sec{background:var(--card);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.sec>summary{padding:16px;font:700 20px Barlow,sans-serif;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary span{flex:1;min-width:0}
+.sec>summary em{font:500 14px Barlow,sans-serif;font-style:normal;color:var(--mut);max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec>summary::after{content:"+";font-size:26px;line-height:1;color:var(--mut);flex:none}
+.sec[open]>summary::after{content:"\2212"}
+.secb{padding:0 12px 12px}
+.secb .hlp{background:var(--bg)}
+.secb .thm{background:var(--bg)}
+.hlp{background:var(--card);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.hlp summary{padding:14px;font:700 17px Barlow,sans-serif;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hlp summary::-webkit-details-marker{display:none}
+.hlp summary::after{content:"+";font-size:24px;line-height:1;color:var(--mut);flex:none}
+.hlp[open] summary::after{content:"\2212"}
+.hb{padding:0 14px 14px;font-size:15px;line-height:1.5}
+.hb ol,.hb ul{margin:0;padding-left:20px}
+.hb li{margin-bottom:6px}
+.authwrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px 4px}
+.authcard{width:100%;max-width:380px;background:var(--card);border-radius:18px;padding:24px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.authlogo{font:700 44px/1 "Barlow Condensed","Arial Narrow",sans-serif;color:var(--acc)}
+.authsub{color:var(--mut);font-size:14px;line-height:1.45;margin:4px 0 12px}
+.authcard h2{margin:6px 0 4px;font:700 24px Barlow,sans-serif}
+.authcard input{display:block;width:100%;margin:8px 0;padding:13px;border-radius:10px;border:1px solid var(--line);font:600 16px Barlow,sans-serif;background:var(--bg);color:var(--ink)}
+.authcard button.p{display:block;width:100%;margin-top:10px;padding:14px;border-radius:10px;border:0;background:var(--acc);color:var(--onacc);font:700 17px Barlow,sans-serif}
+.authcard button.p:disabled{opacity:.55}
+.authcard button.lnk{display:block;width:100%;background:none;border:0;color:var(--acc);font:600 15px Barlow,sans-serif;padding:11px 4px;margin-top:2px}
+.authmsg{font-size:14px;margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--sel);color:var(--ink)}
+.authmsg.err{background:rgba(201,58,58,.12);color:var(--bad)}
+#auth{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:12px}
 .modal.on{display:flex}
 .modal .card{background:var(--card);border-radius:16px;padding:12px;width:100%;max-width:420px}
@@ -212,17 +242,24 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 <div id="court" class="modal"></div>
 <div id="pstat" class="modal"></div>
 <div id="assist" class="modal"></div>
+<div id="auth" hidden></div>
 <div id="toast" role="status"></div>
 <input type="file" id="file" accept="image/*">
 <input type="file" id="cam" accept="image/*" capture="environment">
 
 <script>
+/* ===== Sign-in (email verification) =====
+   Paste your Supabase Project URL and anon (public) key below to turn on sign-up.
+   Leave both empty and the app opens without a sign-in screen. */
+const AUTH_CFG={url:'',key:''};
+const AUTH_ON=!!(AUTH_CFG.url&&AUTH_CFG.key);
+let SKEY='hoops',sb=null,authUser=null,authMode='loading',authMsg='',authEmail='',authBusy=false;
 const T=[['game','Game'],['box','Box score'],['roster','Roster'],['games','Saved']];
 const S0={teams:[{id:'t1',name:'My team',players:[]}],tid:'t1',games:[],finished:[],gid:null,opp:'Away',leagues:[],league:'',court:[],profiles:[],view:null,log:[],q:1,sel:null,tab:'roster',fmt:'q'};
 let S=load();S.screen='home';ensureProfiles();
-function load(){try{const s=JSON.parse(localStorage.getItem('hoops')||'null');const o=s?Object.assign({},S0,s):{...S0};if(s&&s.players&&!s.teams){o.teams=[{id:'t1',name:'My team',players:s.players}];o.tid='t1'}delete o.players;return o}catch(e){return {...S0}}}
+function load(){try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');const o=s?Object.assign({},S0,s):{...S0};if(s&&s.players&&!s.teams){o.teams=[{id:'t1',name:'My team',players:s.players}];o.tid='t1'}delete o.players;return o}catch(e){return {...S0}}}
 function save(){try{const t=tm();if(t&&t.players.length)t.saved=JSON.parse(JSON.stringify(t.players))}catch(e){}
-try{localStorage.setItem('hoops',JSON.stringify(S))}catch(e){}}
+try{localStorage.setItem(SKEY,JSON.stringify(S))}catch(e){}}
 const tm=()=>S.teams.find(t=>t.id===S.tid)||S.teams[0];
 let pendPhoto=null,photoTarget=null,editAv=null,lf='all',subs=false,undoOpen=false,flf='all',finEdit=null,lastTap=null,courtEntry=null,chartP='all',cm=null,courtOpenedAt=0,court3=false,ignore3Until=0,assistTimer=null,pendingAssist=null,assistFor=null,pcard=null,profFrom='home',pickOpen=false,pickSel=[],profSortOpen=false;
 const EMO=['🏀','🔥','⭐','👑','🦁','🐯','🐺','🦅','🐻','🦈','🚀','⚡','💪','😎','🎯','🛡️'];
@@ -339,9 +376,80 @@ function applyTheme(){const t=THEMES.find(x=>x[0]===S.theme)||THEMES[0],p=t[2],s
  const card=`--t1d:${mix(p,'#000000',.6)};--t1x:${mix(p,'#000000',.82)};--t2:${s2};--t2d:${mix(s2,'#000000',.4)};--t2l:${t2l};--t2ink:${inkOn(s2)}`;
  let el=document.getElementById('themecss');if(!el){el=document.createElement('style');el.id='themecss';document.head.appendChild(el)}
  el.textContent=`:root{${lightV};${card}}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){${darkV}}}:root[data-theme="dark"]{${darkV}}`}
-function settingsUI(){const cur=S.theme||'def';
- const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Settings</h1></div>`;
- return head+`<h1>Theme</h1><div style="color:var(--mut);font-size:14px;margin:-4px 2px 10px">Pick a team and the colors change across the whole app.</div><div class="thgrid">${THEMES.map(([k,n,p,s2])=>`<button class="thm ${k===cur?'on':''}" data-th="${k}" aria-pressed="${k===cur}"><span class="sws"><i style="background:${p}"></i><i style="background:${s2}"></i></span><span>${esc(n)}</span></button>`).join('')}</div>`}
+const HELP=[
+['Quick start: your first game',`<ol><li>On <b>Home</b>, tap <b>New game</b>. It opens the <b>Roster</b> tab.</li><li>Pick your team (tap it to load its saved roster) or tap <b>Add team</b> to make one.</li><li>Type the <b>Opponent</b>, choose a <b>League/Tournament</b> if you want, and choose <b>Game format</b> (4 quarters or 2 halves).</li><li>Under <b>Add a player</b>, type a name and number and tap <b>Add</b>, or tap the name box and pick a previous player.</li><li>Tap the <b>Game</b> tab, tap a player, then tap stat buttons as plays happen.</li><li>When the game is over, tap <b>End game</b> at the bottom of the Game tab.</li></ol>`],
+['Home screen',`<ul><li><b>Continue game</b> appears when a game is in progress.</li><li><b>New game</b> saves the current game first, then starts fresh with an empty roster, opponent and league.</li><li><b>Saved games</b>: games you saved to finish later.</li><li><b>Finished games</b>: ended games, locked for viewing.</li><li><b>Hall of Fame</b>: trading cards for your favorite players.</li><li><b>My Teams</b>: every team with its record and roster.</li><li><b>Player profiles</b>: saved players you can add to any roster.</li><li>The <b>gear</b> in the top corner opens Settings.</li></ul>`],
+['Game tab: tracking stats live',`<ul><li>The bar at the top shows the score. Tap <b>Q1, Q2...</b> (or <b>H1, H2</b>) to change the period. <b>Home</b> takes you back to the home screen.</li><li><b>On court</b>: tap a player to select them. Tap <b>Subs</b> to choose which 5 are on the floor, then <b>Done</b>.</li><li><b>Shots</b>: tap <b>2PT, 3PT or FT made/miss</b> for the selected player. The small <b>Undo</b> beside each button removes the last shot of that type.</li><li><b>Rebound, Assist, Steal, Block, Turnover, Foul</b>: tap to add one. <b>Undo stat</b> at the bottom asks which of these six to remove one from.</li><li>The away team has <b>+1, +2, +3</b> and its own small <b>Undo</b>.</li></ul>`],
+['Shot locations and assists',`<ul><li><b>Double-tap</b> a 2PT, 3PT or FT button to open the court and tap where the shot was taken.</li><li>Tap <b>Shot chart</b> (next to the double-tap tip) to add made or missed shots straight onto the court for any player.</li><li>After a <b>made 2PT or 3PT</b>, a popup asks who assisted. Pick a player on the floor or <b>No assist</b>.</li><li>Undoing a shot also removes the assist you gave for it.</li></ul>`],
+['Box score tab',`<ul><li>Shows every player's stats and the team totals for the current game, plus scoring by period.</li><li>Tap a <b>player's name</b> to see their shot chart. Use the buttons above the court to switch players or see everyone.</li></ul>`],
+['Roster tab: game setup',`<ul><li><b>Team</b>: tap a team to switch to it. <b>Add team</b> makes a new one and <b>Delete</b> removes the current one.</li><li><b>Opponent, League/Tournament, Game format</b>: set these before the game. You can also type a new league name and tap <b>Add</b>.</li><li><b>Add a player</b>: tap the name box to see previous players, or use <b>Add from profiles</b>. Players you add are saved as profiles automatically.</li><li>Tap a player's <b>circle</b> to set their jersey number for this roster, an emoji or color avatar, or a photo.</li><li><b>Save game</b> saves the roster, opponent, league and stats so far.</li></ul>`],
+['Saved games',`<ul><li>Open from <b>Home</b> or the <b>Saved</b> tab.</li><li><b>View</b> shows the box score, <b>Resume</b> continues the game, and <b>Delete</b> removes it (tap twice to confirm).</li><li>Use the chips at the top to filter by league and see your record.</li></ul>`],
+['Ending a game and Finished games',`<ul><li><b>End game</b> (tap twice) saves the final stats, removes the game from Saved games, and clears the roster for the next one.</li><li>Open <b>Finished games</b> from Home. Games there are locked, but you can tap <b>Edit details</b> to change the <b>final score, opponent and league/tournament</b>. Player stats never change.</li><li>If you only tracked a few players, set the real final score here. The box score still shows only the players you tracked.</li><li><b>Share</b> sends the box score as a picture (or text) using your phone's share sheet.</li></ul>`],
+['Hall of Fame',`<ul><li>Only players marked as <b>favorites</b> get a card.</li><li>Tap a name at the top to pick a card. <b>Tap the card</b> to flip it and see every game.</li><li>A player who wore different jersey numbers still has one card.</li></ul>`],
+['Player profiles',`<ul><li>Open from <b>Home</b> or <b>Manage</b> in the Roster tab.</li><li>Tap the <b>basketball icon</b> to make a player a favorite. Favorites stay at the top, and the <b>Sort</b> button changes the order of the rest.</li><li>Tap a player's <b>name</b> to see all of their stats. Tap their <b>circle</b> to edit their details and avatar.</li></ul>`],
+['My Teams',`<ul><li>Shows each team's <b>record</b> from finished games, average points for and against, recent results, and roster.</li><li><b>Use for next game</b> makes that team current and loads its saved roster.</li></ul>`],
+['Good to know',`<ul><li>Everything is saved on <b>this device, in this browser</b>. Clearing your browser data erases it, and another phone won't see it.</li><li>On the Game tab, a stat tap saves instantly. Use the Undo buttons to fix mistakes.</li><li>Pick a team's colors under <b>Theme</b> below to restyle the whole app.</li></ul>`]];
+function helpUI(){return sec('help','How to use the app',`<div style="color:var(--mut);font-size:14px;margin:0 2px 10px">Tap a topic to open it.</div>`+HELP.map((h,i)=>`<details class="hlp" data-sec="hp${i}"${openSet['hp'+i]?' open':''}><summary>${h[0]}</summary><div class="hb">${h[1]}</div></details>`).join(''),HELP.length+' topics')}
+const openSet={};
+const sec=(key,title,body,hint)=>`<details class="sec" data-sec="${key}"${openSet[key]?' open':''}><summary><span>${title}</span>${hint?`<em>${hint}</em>`:''}</summary><div class="secb">${body}</div></details>`;
+function accountUI(){return AUTH_ON&&authUser?sec('acct','Account',`<div class="line" style="margin:0"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">Signed in as <b>${esc(authUser.email||'')}</b></span><button class="d" id="au-logout" style="border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font:600 15px Barlow,sans-serif">Log out</button></div>`,esc(authUser.email||'')):''}
+const isConf=u=>!!(u&&(u.email_confirmed_at||u.confirmed_at));
+function renderAuth(){const el=document.getElementById('auth');if(!el)return;
+ if(!AUTH_ON||(authUser&&isConf(authUser)&&authMode==='in')){el.hidden=true;return}
+ el.hidden=false;const m=authMsg?`<div class="authmsg${authMsg[0]==='!'?' err':''}" role="alert">${esc(authMsg.replace(/^!/,''))}</div>`:'';
+ const em=`<input id="au-e" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="Email address" value="${esc(authEmail)}">`;
+ const pw=(id,ph,ac)=>`<input id="${id}" type="password" autocomplete="${ac||'current-password'}" placeholder="${ph}">`;
+ const b=authBusy?' disabled':'';let h;
+ if(authMode==='loading')h=`<div class="authsub" style="margin-top:14px">Checking your sign-in...</div>`;
+ else if(authMode==='error')h=`<h2>Can't reach sign-in</h2><div class="authmsg err">Check your internet connection and try again.</div><button class="p" id="au-retry">Try again</button>`;
+ else if(authMode==='signup')h=`<h2>Create your account</h2><div class="authsub">We'll email you a link to verify your address before you can use the app.</div>${m}${em}${pw('au-p','Password (8+ characters)','new-password')}${pw('au-p2','Confirm password','new-password')}<button class="p" id="au-signup"${b}>Create account</button><button class="lnk" data-am="login">I already have an account</button>`;
+ else if(authMode==='verify')h=`<h2>Verify your email</h2><div class="authsub">We sent a verification link to <b>${esc(authEmail)}</b>. Open the email, tap the link, then come back and log in. Check your spam folder if you don't see it.</div>${m}<button class="p" id="au-resend"${b}>Resend email</button><button class="lnk" data-am="login">Back to log in</button>`;
+ else if(authMode==='forgot')h=`<h2>Reset your password</h2><div class="authsub">Enter your email and we'll send you a link to choose a new password.</div>${m}${em}<button class="p" id="au-forgot"${b}>Send reset link</button><button class="lnk" data-am="login">Back to log in</button>`;
+ else if(authMode==='reset')h=`<h2>Choose a new password</h2>${m}${pw('au-p','New password (8+ characters)','new-password')}${pw('au-p2','Confirm new password','new-password')}<button class="p" id="au-reset"${b}>Save password</button>`;
+ else h=`<h2>Log in</h2>${m}${em}${pw('au-p','Password')}<button class="p" id="au-login"${b}>Log in</button><button class="lnk" data-am="forgot">Forgot password?</button><button class="lnk" data-am="signup">Create an account</button>`;
+ el.innerHTML=`<div class="authwrap"><div class="authcard"><div class="authlogo">Courtside</div><div class="authsub">Live basketball stats</div>${h}</div></div>`}
+const aval=id=>((document.getElementById(id)||{}).value||'');
+function amsg(t){authMsg=t;authBusy=false;renderAuth()}
+const okEmail=e=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
+function loadSb(){return new Promise((res,rej)=>{if(window.supabase)return res();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';sc.onload=res;sc.onerror=()=>rej(new Error('load'));document.head.appendChild(sc)})}
+function adoptLegacy(uid){try{const k='hoops_'+uid;if(localStorage.getItem(k))return;const leg=localStorage.getItem('hoops');if(leg&&!localStorage.getItem('hoops_owner')){localStorage.setItem(k,leg);localStorage.setItem('hoops_owner',uid)}}catch(e){}}
+function onAuthed(u){authUser=u;if(!isConf(u)){authMode='verify';authEmail=u.email||authEmail;renderAuth();return}
+ adoptLegacy(u.id);SKEY='hoops_'+u.id;S=load();S.screen='home';ensureProfiles();if(cleanData())save();applyTheme();authMode='in';authMsg='';renderAuth();draw();try{history.replaceState(null,'',location.pathname)}catch(e){}}
+async function initAuth(){authMode='loading';authMsg='';renderAuth();
+ try{await loadSb();if(!sb)sb=window.supabase.createClient(AUTH_CFG.url,AUTH_CFG.key)}catch(e){authMode='error';renderAuth();return}
+ if(!initAuth.hooked){initAuth.hooked=true;sb.auth.onAuthStateChange((ev,session)=>{
+  if(ev==='PASSWORD_RECOVERY'){authMode='reset';authMsg='';renderAuth();return}
+  if(ev==='SIGNED_OUT'){authUser=null;authMode='login';renderAuth();return}
+  if(ev==='SIGNED_IN'&&session&&session.user&&!authUser&&authMode!=='reset')onAuthed(session.user)})}
+ try{const {data}=await sb.auth.getSession();
+  if(/type=recovery/.test(location.hash)){authMode='reset';renderAuth();return}
+  if(data&&data.session)onAuthed(data.session.user);else{authMode='login';renderAuth()}}catch(e){authMode='error';renderAuth()}}
+async function doSignup(){const e=authEmail.trim(),p1=aval('au-p'),p2=aval('au-p2');
+ if(!okEmail(e))return amsg('!Enter a valid email address.');if(p1.length<8)return amsg('!Use a password with at least 8 characters.');if(p1!==p2)return amsg('!The two passwords do not match.');
+ authEmail=e;authBusy=true;renderAuth();
+ try{const {data,error}=await sb.auth.signUp({email:e,password:p1,options:{emailRedirectTo:location.origin}});
+  if(error)return amsg('!'+error.message);
+  if(data.user&&data.user.identities&&data.user.identities.length===0)return amsg('!That email is already registered. Log in instead.');
+  if(data.session&&isConf(data.session.user)){authBusy=false;return onAuthed(data.session.user)}
+  authBusy=false;authMode='verify';authMsg='';renderAuth()}catch(x){amsg('!Something went wrong. Please try again.')}}
+async function doLogin(){const e=authEmail.trim(),p=aval('au-p');if(!okEmail(e))return amsg('!Enter a valid email address.');if(!p)return amsg('!Enter your password.');
+ authEmail=e;authBusy=true;renderAuth();
+ try{const {data,error}=await sb.auth.signInWithPassword({email:e,password:p});
+  if(error){if(/confirm/i.test(error.message)){authBusy=false;authMode='verify';authMsg='!Your email isn\'t verified yet. Open the link we emailed you, or resend it below.';return renderAuth()}
+   return amsg('!'+(/invalid/i.test(error.message)?'Wrong email or password.':error.message))}
+  authBusy=false;onAuthed(data.user||(data.session&&data.session.user))}catch(x){amsg('!Something went wrong. Please try again.')}}
+async function doResend(){authBusy=true;renderAuth();try{const {error}=await sb.auth.resend({type:'signup',email:authEmail,options:{emailRedirectTo:location.origin}});if(error)return amsg('!'+error.message);amsg('Verification email sent again. Check your inbox.')}catch(x){amsg('!Could not resend. Try again in a minute.')}}
+async function doForgot(){const e=authEmail.trim();if(!okEmail(e))return amsg('!Enter a valid email address.');authEmail=e;authBusy=true;renderAuth();
+ try{const {error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin});if(error)return amsg('!'+error.message);amsg('If that email has an account, a reset link is on its way.')}catch(x){amsg('!Something went wrong. Please try again.')}}
+async function doReset(){const p1=aval('au-p'),p2=aval('au-p2');if(p1.length<8)return amsg('!Use a password with at least 8 characters.');if(p1!==p2)return amsg('!The two passwords do not match.');
+ authBusy=true;renderAuth();try{const {data,error}=await sb.auth.updateUser({password:p1});if(error)return amsg('!'+error.message);authBusy=false;authMsg='';if(data&&data.user)onAuthed(data.user);else{authMode='login';renderAuth()}}catch(x){amsg('!Something went wrong. Please try again.')}}
+async function doLogout(){try{await sb.auth.signOut()}catch(e){}authUser=null;authMode='login';authMsg='';SKEY='hoops';draw();renderAuth()}
+document.addEventListener('input',e=>{if(e.target.id==='au-e')authEmail=e.target.value});
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.sec)openSet[d.dataset.sec]=d.open},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest&&e.target.closest('#auth')){const bt=document.querySelector('#auth button.p');if(bt&&!bt.disabled)bt.click()}});
+function settingsUI(){const cur=S.theme||'def',ct=(THEMES.find(x=>x[0]===cur)||THEMES[0])[1];
+ const head=`<div style="display:flex;align-items:center;gap:12px;margin-top:14px;margin-bottom:12px"><button class="sm" data-home="1">Home</button><h1 style="margin:0;font-size:32px">Settings</h1></div>`;
+ return head+accountUI()+helpUI()+sec('theme','Theme',`<div style="color:var(--mut);font-size:14px;margin:0 2px 10px">Pick a team and the colors change across the whole app.</div><div class="thgrid">${THEMES.map(([k,n,p,s2])=>`<button class="thm ${k===cur?'on':''}" data-th="${k}" aria-pressed="${k===cur}"><span class="sws"><i style="background:${p}"></i><i style="background:${s2}"></i></span><span>${esc(n)}</span></button>`).join('')}</div>`,esc(ct))}
 function hofList(){return playerIndex().filter(e=>{const pr=S.profiles.find(x=>'pr:'+x.id===e.key);return pr&&pr.fav})}
 function hofSub(){const n=hofList().length;if(n)return n+' favorite'+(n===1?'':'s')+' · tap to see their cards';return S.profiles.some(x=>x.fav)?'Your favorites show up here once they have stats':'Mark favorites in Player profiles to add them here'}
 function closeAssist(){document.getElementById('assist').classList.remove('on');assistFor=null}
@@ -630,7 +738,7 @@ document.addEventListener('click',e=>{
  else if(d.fview){S.fview=d.fview;draw();window.scrollTo(0,0)}
  else if(b.id==='finback'){S.fview=null;draw()}
  else if(d.flf){flf=d.flf;draw()}
- else if(d.go==='settings'){S.screen='settings';draw();window.scrollTo(0,0)}
+ else if(d.go==='settings'){Object.keys(openSet).forEach(k=>delete openSet[k]);S.screen='settings';draw();window.scrollTo(0,0)}
  else if(d.th){S.theme=d.th;applyTheme();save();draw();const t=THEMES.find(x=>x[0]===d.th);toast((t?t[1]:'Theme')+' theme applied')}
  else if(d.go==='prof'){profFrom=d.from||'home';S.screen='prof';editAv=null;draw();window.scrollTo(0,0)}
  else if(b.id==='pback'){editAv=null;if(profFrom==='roster'){S.screen='app';S.tab='roster'}else S.screen='home';draw();window.scrollTo(0,0)}
@@ -649,6 +757,14 @@ document.addEventListener('click',e=>{
  else if(d.fav){const pr=S.profiles.find(x=>x.id===d.fav);if(pr){pr.fav=!pr.fav;save();draw();toast(pr.fav?pr.name+' added to favorites':pr.name+' removed from favorites')}}
  else if(b.id==='sortbtn'){profSortOpen=!profSortOpen;draw()}
  else if(d.sort){S.profSort=d.sort;profSortOpen=false;save();draw()}
+ else if(d.am){authMode=d.am;authMsg='';renderAuth()}
+ else if(b.id==='au-signup'){doSignup()}
+ else if(b.id==='au-login'){doLogin()}
+ else if(b.id==='au-resend'){doResend()}
+ else if(b.id==='au-forgot'){doForgot()}
+ else if(b.id==='au-reset'){doReset()}
+ else if(b.id==='au-retry'){initAuth()}
+ else if(b.id==='au-logout'){doLogout()}
  else if(d.psave){const pr=S.profiles.find(x=>x.id===d.psave);if(!pr)return;const n=document.getElementById('pe-n').value.trim(),m=document.getElementById('pe-m').value.trim(),po=document.getElementById('pe-p').value;if(!m){toast('Enter a name');return}
   const oldNum=pr.num;pr.num=n||'-';pr.name=m;pr.pos=po;S.teams.forEach(t=>t.players.forEach(q=>{if(q.pid===pr.id){if(q.num===oldNum)q.num=pr.num;q.name=pr.name;q.pos=pr.pos}}));save();draw();toast('Profile saved')}
  else if(d.pdel){if(!b.dataset.c){b.dataset.c=1;b.textContent='Confirm';return}S.profiles=S.profiles.filter(x=>x.id!==d.pdel);if(editAv===d.pdel)editAv=null;save();draw();toast('Profile deleted')}
@@ -721,6 +837,6 @@ function showSug(){const box=document.getElementById('psug'),inp=document.getEle
 document.addEventListener('focusin',e=>{if(e.target.id==='pm')showSug()});
 document.addEventListener('input',e=>{if(e.target.id==='pm')showSug()});
 if(tm().players.length&&S.tab==='roster')S.tab='game';
-if(cleanData())save();applyTheme();draw();
+if(AUTH_ON){applyTheme();initAuth()}else{if(cleanData())save();applyTheme();draw()}
 </script>
 </body></html>
